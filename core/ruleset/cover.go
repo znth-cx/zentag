@@ -3,8 +3,8 @@ package ruleset
 import (
 	"context"
 
-	"codeberg.org/Ether/zentag/core/cover"
-	"codeberg.org/Ether/zentag/core/metadata"
+	"github.com/znth-cx/zentag/core/cover"
+	"github.com/znth-cx/zentag/core/metadata"
 )
 
 // CheckCover checks RULES.md §8: cover must be present and valid (decodable JPEG/PNG, under 3MB).

@@ -4,8 +4,8 @@ import (
 	"reflect"
 	"testing"
 
-	"codeberg.org/Ether/zentag/core/metadata"
-	"codeberg.org/Ether/zentag/internal/version"
+	"github.com/znth-cx/zentag/core/metadata"
+	"github.com/znth-cx/zentag/internal/version"
 )
 
 func TestMetadataArgs_FullFields(t *testing.T) {

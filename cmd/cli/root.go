@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"log/slog"
 
-	"codeberg.org/Ether/zentag/internal/config"
-	"codeberg.org/Ether/zentag/internal/logging"
+	"github.com/znth-cx/zentag/internal/config"
+	"github.com/znth-cx/zentag/internal/logging"
+	"github.com/znth-cx/zentag/internal/version"
 	"github.com/spf13/cobra"
 )
 
@@ -32,6 +33,7 @@ var rootCmd = &cobra.Command{
 }
 
 func init() {
+	rootCmd.Version = version.Version
 	rootCmd.SilenceErrors = true
 	// Suppresses usage block on check violations, also on genuine arg/flag
 	// errors for any subcommand: acceptable since --help still works.

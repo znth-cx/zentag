@@ -1,8 +1,8 @@
 package ruleset
 
 import (
-	"codeberg.org/Ether/zentag/core/isbn"
-	"codeberg.org/Ether/zentag/core/metadata"
+	"github.com/znth-cx/zentag/core/isbn"
+	"github.com/znth-cx/zentag/core/metadata"
 )
 
 // CheckPrimaryKeys checks RULES.md §2: needs ISBN or ASIN; if ISBN present, checksum must be valid.

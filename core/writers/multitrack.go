@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"codeberg.org/Ether/zentag/core/ffmpeg"
-	"codeberg.org/Ether/zentag/core/metadata"
+	"github.com/znth-cx/zentag/core/ffmpeg"
+	"github.com/znth-cx/zentag/core/metadata"
 )
 
 // WriteTracks tags each of meta's tracks into outputDir, the shared body of the

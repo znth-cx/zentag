@@ -12,12 +12,12 @@ import (
 	"strconv"
 	"testing"
 
-	"codeberg.org/Ether/zentag/core/ffmpeg"
-	"codeberg.org/Ether/zentag/core/mediainfo"
-	"codeberg.org/Ether/zentag/core/metadata"
-	"codeberg.org/Ether/zentag/core/naming"
-	"codeberg.org/Ether/zentag/core/ruleset"
-	"codeberg.org/Ether/zentag/internal/config"
+	"github.com/znth-cx/zentag/core/ffmpeg"
+	"github.com/znth-cx/zentag/core/mediainfo"
+	"github.com/znth-cx/zentag/core/metadata"
+	"github.com/znth-cx/zentag/core/naming"
+	"github.com/znth-cx/zentag/core/ruleset"
+	"github.com/znth-cx/zentag/internal/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

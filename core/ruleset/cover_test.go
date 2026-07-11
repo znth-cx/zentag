@@ -9,8 +9,8 @@ import (
 	"math/rand"
 	"testing"
 
-	"codeberg.org/Ether/zentag/core/cover"
-	"codeberg.org/Ether/zentag/core/metadata"
+	"github.com/znth-cx/zentag/core/cover"
+	"github.com/znth-cx/zentag/core/metadata"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

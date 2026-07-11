@@ -3,8 +3,8 @@ package ffmpeg
 import (
 	"strconv"
 
-	"codeberg.org/Ether/zentag/core/metadata"
-	"codeberg.org/Ether/zentag/internal/version"
+	"github.com/znth-cx/zentag/core/metadata"
+	"github.com/znth-cx/zentag/internal/version"
 )
 
 // metadataArgs builds -metadata args per RULES.md §4; artist/composer mirror author/narrator; year=0 and empty ASIN omitted.

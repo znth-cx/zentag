@@ -3,8 +3,8 @@ package ruleset
 import (
 	"fmt"
 
-	"codeberg.org/Ether/zentag/core/lang"
-	"codeberg.org/Ether/zentag/core/metadata"
+	"github.com/znth-cx/zentag/core/lang"
+	"github.com/znth-cx/zentag/core/metadata"
 )
 
 // CheckLanguage checks RULES.md §3/§4: language must be a valid ISO-639-3 code or recognized English name.

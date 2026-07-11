@@ -5,7 +5,7 @@ import (
 	"context"
 	"log/slog"
 
-	"codeberg.org/Ether/zentag/core/metadata"
+	"github.com/znth-cx/zentag/core/metadata"
 )
 
 // Severity is RULES.md §6's classification for a violation.

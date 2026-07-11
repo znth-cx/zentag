@@ -1,0 +1,28 @@
+version: 2
+
+updates:
+  # Go deps. PRs target development; chore(deps) prefix stays out of changelog.
+  - package-ecosystem: gomod
+    directory: /
+    schedule:
+      interval: weekly
+    target-branch: development
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      go-deps:
+        patterns:
+          - "*"
+
+  # Workflow actions.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    target-branch: development
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      actions:
+        patterns:
+          - "*"

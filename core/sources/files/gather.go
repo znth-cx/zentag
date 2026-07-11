@@ -8,10 +8,10 @@ import (
 	"path/filepath"
 	"regexp"
 
-	"codeberg.org/Ether/zentag/core/ffmpeg"
-	"codeberg.org/Ether/zentag/core/lang"
-	"codeberg.org/Ether/zentag/core/mediainfo"
-	"codeberg.org/Ether/zentag/core/metadata"
+	"github.com/znth-cx/zentag/core/ffmpeg"
+	"github.com/znth-cx/zentag/core/lang"
+	"github.com/znth-cx/zentag/core/mediainfo"
+	"github.com/znth-cx/zentag/core/metadata"
 )
 
 // Gather constructs Metadata from path (single file or directory), reading tags only from RULES.md §4 locations for check validation. partNumberRe is nil for default leading-digits or a caller-validated pattern.

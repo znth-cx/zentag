@@ -10,7 +10,7 @@ import (
 
 	mp4 "github.com/Sorrow446/go-mp4tag"
 
-	"codeberg.org/Ether/zentag/core/metadata"
+	"github.com/znth-cx/zentag/core/metadata"
 )
 
 // requireBinary skips the test if name isn't on PATH.

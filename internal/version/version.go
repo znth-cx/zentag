@@ -1,5 +1,7 @@
-// Package version holds zentag's release version, bumped manually per release.
+// Package version holds zentag's release version.
 package version
 
-// Version is embedded as the "zentag" tag on every file zentag writes.
-const Version = "0.1.0"
+// Version lands in the "zentag" tag on written files and in --version.
+// goreleaser stamps release builds via -ldflags -X; non-release builds
+// report "dev".
+var Version = "dev"

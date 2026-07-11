@@ -10,8 +10,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"codeberg.org/Ether/zentag/core/cover"
-	"codeberg.org/Ether/zentag/core/metadata"
+	"github.com/znth-cx/zentag/core/cover"
+	"github.com/znth-cx/zentag/core/metadata"
 )
 
 // ErrNotFound indicates audnexus has no book for the given ASIN.

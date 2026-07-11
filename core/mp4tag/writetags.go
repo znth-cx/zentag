@@ -6,7 +6,7 @@ import (
 	"log/slog"
 	"os"
 
-	"codeberg.org/Ether/zentag/core/metadata"
+	"github.com/znth-cx/zentag/core/metadata"
 )
 
 // maxSize caps WriteTags' input: go-mp4tag seeks/rewrites atoms directly rather than streaming, so huge files risk pathological memory/time use.

@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"codeberg.org/Ether/zentag/core/ffmpeg"
+	"github.com/znth-cx/zentag/core/ffmpeg"
 )
 
 var looseCoverNames = []string{"cover.jpg", "cover.jpeg", "cover.png"}

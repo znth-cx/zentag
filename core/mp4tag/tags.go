@@ -5,8 +5,8 @@ import (
 
 	mp4 "github.com/Sorrow446/go-mp4tag"
 
-	"codeberg.org/Ether/zentag/core/metadata"
-	"codeberg.org/Ether/zentag/internal/version"
+	"github.com/znth-cx/zentag/core/metadata"
+	"github.com/znth-cx/zentag/internal/version"
 )
 
 // buildTags translates m to go-mp4tag's MP4Tags per RULES.md §4. Fields with no native atom (author, subtitle, series, series-part, language, isbn, asin, zentag) go through Custom freeform atoms; narrator too, since go-mp4tag's Narrator field never actually writes the "©nrt" atom (library bug). Year omitted when 0, ASIN omitted when empty; other fields always written.
