@@ -11,9 +11,9 @@ import (
 	"slices"
 	"testing"
 
-	"codeberg.org/Ether/zentag/core/ffmpeg"
-	"codeberg.org/Ether/zentag/core/mediainfo"
-	"codeberg.org/Ether/zentag/core/metadata"
+	"github.com/znth-cx/zentag/core/ffmpeg"
+	"github.com/znth-cx/zentag/core/mediainfo"
+	"github.com/znth-cx/zentag/core/metadata"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

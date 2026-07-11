@@ -5,7 +5,7 @@ import (
 
 	mp4 "github.com/Sorrow446/go-mp4tag"
 
-	"codeberg.org/Ether/zentag/core/metadata"
+	"github.com/znth-cx/zentag/core/metadata"
 )
 
 func TestBuildTags_AllFieldsSetNoCover(t *testing.T) {

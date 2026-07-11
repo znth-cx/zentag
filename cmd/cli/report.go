@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"codeberg.org/Ether/zentag/core/ruleset"
+	"github.com/znth-cx/zentag/core/ruleset"
 	"github.com/charmbracelet/lipgloss"
 )
 

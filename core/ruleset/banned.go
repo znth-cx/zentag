@@ -6,7 +6,7 @@ import (
 
 	edlib "github.com/hbollon/go-edlib"
 
-	"codeberg.org/Ether/zentag/core/metadata"
+	"github.com/znth-cx/zentag/core/metadata"
 )
 
 // bannedAuthors: RULES.md §1 list, lowercased for fuzzy match.

@@ -9,10 +9,10 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"codeberg.org/Ether/zentag/core/ffmpeg"
-	"codeberg.org/Ether/zentag/core/metadata"
-	"codeberg.org/Ether/zentag/core/mp4tag"
-	"codeberg.org/Ether/zentag/core/writers"
+	"github.com/znth-cx/zentag/core/ffmpeg"
+	"github.com/znth-cx/zentag/core/metadata"
+	"github.com/znth-cx/zentag/core/mp4tag"
+	"github.com/znth-cx/zentag/core/writers"
 )
 
 // writeMP4Tags holds mp4tag.WriteTags for test injection.

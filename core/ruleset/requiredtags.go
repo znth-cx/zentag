@@ -3,7 +3,7 @@ package ruleset
 import (
 	"fmt"
 
-	"codeberg.org/Ether/zentag/core/metadata"
+	"github.com/znth-cx/zentag/core/metadata"
 )
 
 // CheckRequiredTags checks RULES.md §4: each missing required field is its own Trumpable violation.

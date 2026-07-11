@@ -5,8 +5,8 @@ import (
 	"log/slog"
 	"time"
 
-	"codeberg.org/Ether/zentag/core/lang"
-	"codeberg.org/Ether/zentag/core/metadata"
+	"github.com/znth-cx/zentag/core/lang"
+	"github.com/znth-cx/zentag/core/metadata"
 )
 
 type person struct {

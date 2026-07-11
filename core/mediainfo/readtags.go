@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"codeberg.org/Ether/zentag/core/metadata"
+	"github.com/znth-cx/zentag/core/metadata"
 )
 
 // TagSet holds book metadata fields read from a file's tags.

@@ -3,7 +3,7 @@ package ruleset
 import (
 	"fmt"
 
-	"codeberg.org/Ether/zentag/core/metadata"
+	"github.com/znth-cx/zentag/core/metadata"
 )
 
 // CheckChapters checks RULES.md §9: M4B tracks need >=1 chapter.

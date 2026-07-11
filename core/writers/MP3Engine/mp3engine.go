@@ -6,9 +6,9 @@ package MP3Engine
 import (
 	"context"
 
-	"codeberg.org/Ether/zentag/core/ffmpeg"
-	"codeberg.org/Ether/zentag/core/metadata"
-	"codeberg.org/Ether/zentag/core/writers"
+	"github.com/znth-cx/zentag/core/ffmpeg"
+	"github.com/znth-cx/zentag/core/metadata"
+	"github.com/znth-cx/zentag/core/writers"
 )
 
 // Write tags each of meta's tracks into outputDir.

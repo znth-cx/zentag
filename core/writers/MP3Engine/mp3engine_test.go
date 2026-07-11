@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"codeberg.org/Ether/zentag/core/ffmpeg"
-	"codeberg.org/Ether/zentag/core/metadata"
+	"github.com/znth-cx/zentag/core/ffmpeg"
+	"github.com/znth-cx/zentag/core/metadata"
 )
 
 type fakeRunner struct {

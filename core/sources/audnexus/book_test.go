@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"codeberg.org/Ether/zentag/core/metadata"
+	"github.com/znth-cx/zentag/core/metadata"
 )
 
 func TestBookToMetadata_FullMapping(t *testing.T) {

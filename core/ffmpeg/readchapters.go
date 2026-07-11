@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"codeberg.org/Ether/zentag/core/metadata"
+	"github.com/znth-cx/zentag/core/metadata"
 )
 
 type ffprobeChaptersOutput struct {

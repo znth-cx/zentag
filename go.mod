@@ -1,4 +1,4 @@
-module codeberg.org/Ether/zentag
+module github.com/znth-cx/zentag
 
 go 1.26.4
 

@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"codeberg.org/Ether/zentag/core/metadata"
-	"codeberg.org/Ether/zentag/core/naming"
+	"github.com/znth-cx/zentag/core/metadata"
+	"github.com/znth-cx/zentag/core/naming"
 )
 
 // CheckNaming checks RULES.md §3: title must be APA title case, dir/track names must match naming.DirectoryName/naming.TrackName.

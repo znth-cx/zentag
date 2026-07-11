@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"strings"
 
-	"codeberg.org/Ether/zentag/core/lang"
-	"codeberg.org/Ether/zentag/core/metadata"
+	"github.com/znth-cx/zentag/core/lang"
+	"github.com/znth-cx/zentag/core/metadata"
 )
 
 // chapterNumberPrefix matches leading digit-based chapter numbers like "01." or "1." to strip before use as ChapterName, avoiding duplication.

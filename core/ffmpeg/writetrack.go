@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"codeberg.org/Ether/zentag/core/metadata"
+	"github.com/znth-cx/zentag/core/metadata"
 )
 
 // WriteOpts holds inputs WriteTrack needs to write one track's tags and chapters.

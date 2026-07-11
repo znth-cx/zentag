@@ -4,11 +4,11 @@ import (
 	"errors"
 	"fmt"
 
-	"codeberg.org/Ether/zentag/core/ffmpeg"
-	"codeberg.org/Ether/zentag/core/mediainfo"
-	"codeberg.org/Ether/zentag/core/ruleset"
-	"codeberg.org/Ether/zentag/core/sources/audnexus"
-	"codeberg.org/Ether/zentag/core/sources/files"
+	"github.com/znth-cx/zentag/core/ffmpeg"
+	"github.com/znth-cx/zentag/core/mediainfo"
+	"github.com/znth-cx/zentag/core/ruleset"
+	"github.com/znth-cx/zentag/core/sources/audnexus"
+	"github.com/znth-cx/zentag/core/sources/files"
 	"github.com/spf13/cobra"
 )
 
