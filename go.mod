@@ -1,6 +1,6 @@
 module github.com/znth-cx/zentag
 
-go 1.26.4
+go 1.26.5
 
 require (
 	github.com/Sorrow446/go-mp4tag v0.0.0-20240130220823-68ce31d53e37

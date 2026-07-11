@@ -10,6 +10,14 @@ on:
       - main
       - development
 
+permissions:
+  contents: read
+
+# Cancel superseded runs on same branch; saves private-repo minutes.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     strategy:
@@ -37,6 +45,18 @@ jobs:
 
       - name: go test
         run: go test ./...
+
+  # Call-graph-aware CVE scan; complements dependabot alerts.
+  govulncheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+
+      - run: go run golang.org/x/vuln/cmd/govulncheck@latest ./...
 
   goreleaser-check:
     runs-on: ubuntu-latest
