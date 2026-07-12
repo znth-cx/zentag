@@ -47,6 +47,9 @@ type Track struct {
 	Chapters   []Chapter
 }
 
+// MaxYear bounds Year at parse and write sites; keeps int32 tag atoms safe.
+const MaxYear = 9999
+
 // Metadata is the canonical model for one audiobook item (single file or multi-file directory).
 type Metadata struct {
 	OriginalPath   string

@@ -11,23 +11,24 @@ Install these before using zentag, and ensure they're on your `PATH` (or point t
 - [`ffmpeg`](https://ffmpeg.org/) / `ffprobe`: chapter and tag muxing (MP3/FLAC), chapter remuxing (M4B)
 - [`mediainfo`](https://mediaarea.net/en/MediaInfo): reads back written tags for validation. Make sure to install the CLI version, not the GUI version.
 
-## Build
-
-Requires Go 1.26.4+.
-
-```
-go build -o zentag ./cmd/cli/
-```
-
-Produces a `zentag` (or `zentag.exe` on Windows) binary in the current directory.
-
 ## Install
 
-No installer/package yet. After building, put the binary somewhere on your `PATH`, e.g.:
+### Linux
+- Download a release from https://github.com/znth-cx/zentag/releases
+- Extract the archive (ex. `tar -xzf zentag_0.1.0_linux_amd64.tar.gz`).
+- Place the binary into your path. The local non-sudo path is `~/.local/bin`.
+- You can now use the zentag command.
 
-```
-mv zentag /usr/local/bin/
-```
+### Windows
+- Download a release from https://github.com/znth-cx/zentag/releases
+- Extract it and find the zentag.exe inside.
+- Place the binary on your local or system PATH.
+- Invoke the zentag command in your terminal, double clicking/opening the binary via file explorer will not work!
+
+### MacOS
+- you get the darwin award
+
+### Post Install
 
 On first run, zentag writes a default config to your user config dir (e.g. `~/.config/zentag/zentag.yaml` on Linux or `%APPDATA%\Roaming\zentag` on Windows) if none exists. Edit it to set:
 
@@ -70,3 +71,13 @@ zentag check --help
 ```
 
 Global flags: `--config <path>` (override config file location), `-v`/`--verbose` (debug logging).
+
+## Build
+
+Requires Go 1.26.4+.
+
+```
+go build -o zentag ./cmd/cli/
+```
+
+Produces a `zentag` (or `zentag.exe` on Windows) binary in the current directory.
