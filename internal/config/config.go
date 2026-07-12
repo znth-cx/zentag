@@ -15,6 +15,7 @@ type Config struct {
 	FFmpegPath    string `mapstructure:"ffmpeg_path"`
 	FFprobePath   string `mapstructure:"ffprobe_path"`
 	MediaInfoPath string `mapstructure:"mediainfo_path"`
+	EbookMetaPath string `mapstructure:"ebook_meta_path"`
 	OutputDir     string `mapstructure:"output_dir"`
 	// SessionDir holds per-item session JSON for resuming after crashes. Removed only via --clean.
 	SessionDir string `mapstructure:"session_dir"`
@@ -27,6 +28,7 @@ func Load(cfgFile string) (*Config, error) {
 	v.SetDefault("ffmpeg_path", "ffmpeg")
 	v.SetDefault("ffprobe_path", "ffprobe")
 	v.SetDefault("mediainfo_path", "mediainfo")
+	v.SetDefault("ebook_meta_path", "ebook-meta")
 	v.SetDefault("output_dir", "./zentag-output")
 	// Prefer user config dir for session_dir so resume works from any cwd. Fallback is Abs'd after unmarshal.
 	if configDir, err := os.UserConfigDir(); err == nil {
