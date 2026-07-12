@@ -3,8 +3,8 @@ package ruleset
 import (
 	"testing"
 
-	"github.com/znth-cx/zentag/core/metadata"
 	"github.com/stretchr/testify/assert"
+	"github.com/znth-cx/zentag/core/metadata"
 )
 
 // fullMeta returns Metadata with every RULES.md §4 required field set; reused as a clean baseline tests break one field at a time.

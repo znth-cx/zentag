@@ -5,10 +5,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/znth-cx/zentag/core/metadata"
-	"github.com/znth-cx/zentag/core/naming"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/znth-cx/zentag/core/metadata"
+	"github.com/znth-cx/zentag/core/naming"
 )
 
 // fullyBrokenMeta trips all seven Check* funcs: bad ISBN, missing year, invalid language, missing cover, no chapters, banned author/title, bare single-file path.

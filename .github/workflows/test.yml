@@ -23,7 +23,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v7
@@ -36,6 +36,10 @@ jobs:
       - name: Install ffmpeg and mediainfo
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y ffmpeg mediainfo
+
+      - name: Install ffmpeg and mediainfo (macOS)
+        if: runner.os == 'macOS'
+        run: brew install ffmpeg mediainfo
 
       - name: go vet
         run: go vet ./...

@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"log/slog"
 
+	"github.com/spf13/cobra"
 	"github.com/znth-cx/zentag/internal/config"
 	"github.com/znth-cx/zentag/internal/logging"
 	"github.com/znth-cx/zentag/internal/version"
-	"github.com/spf13/cobra"
 )
 
 var (

@@ -4,12 +4,12 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/spf13/cobra"
 	"github.com/znth-cx/zentag/core/ffmpeg"
 	"github.com/znth-cx/zentag/core/mediainfo"
 	"github.com/znth-cx/zentag/core/ruleset"
 	"github.com/znth-cx/zentag/core/sources/audnexus"
 	"github.com/znth-cx/zentag/core/sources/files"
-	"github.com/spf13/cobra"
 )
 
 // newFFmpegWrapper/newMediaInfoWrapper: package vars, not direct calls,

@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/znth-cx/zentag/core/metadata"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/znth-cx/zentag/core/metadata"
 )
 
 func sampleMeta() *metadata.Metadata {

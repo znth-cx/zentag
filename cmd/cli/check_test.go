@@ -12,14 +12,14 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/znth-cx/zentag/core/ffmpeg"
 	"github.com/znth-cx/zentag/core/mediainfo"
 	"github.com/znth-cx/zentag/core/metadata"
 	"github.com/znth-cx/zentag/core/naming"
 	"github.com/znth-cx/zentag/core/ruleset"
 	"github.com/znth-cx/zentag/internal/config"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestCheckCmd_RequiresExactlyOneArg(t *testing.T) {

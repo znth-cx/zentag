@@ -5,9 +5,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/znth-cx/zentag/core/ruleset"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/znth-cx/zentag/core/ruleset"
 )
 
 func TestFormatReport_EmptyText(t *testing.T) {
