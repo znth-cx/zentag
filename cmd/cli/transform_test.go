@@ -11,6 +11,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/znth-cx/zentag/core/ffmpeg"
 	"github.com/znth-cx/zentag/core/mediainfo"
 	"github.com/znth-cx/zentag/core/metadata"
@@ -19,8 +21,6 @@ import (
 	"github.com/znth-cx/zentag/core/session"
 	"github.com/znth-cx/zentag/core/sources/audnexus"
 	"github.com/znth-cx/zentag/internal/logging"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestTransformCmd_RequiresExactlyOneArg(t *testing.T) {

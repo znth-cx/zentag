@@ -12,14 +12,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/znth-cx/zentag/core/cover"
-	"github.com/znth-cx/zentag/core/ffmpeg"
-	"github.com/znth-cx/zentag/core/isbn"
-	"github.com/znth-cx/zentag/core/lang"
-	"github.com/znth-cx/zentag/core/mediainfo"
-	"github.com/znth-cx/zentag/core/metadata"
-	"github.com/znth-cx/zentag/core/sources/audnexus"
-	"github.com/znth-cx/zentag/core/sources/files"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/textarea"
 	"github.com/charmbracelet/bubbles/textinput"
@@ -28,6 +20,14 @@ import (
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/huh/spinner"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/znth-cx/zentag/core/cover"
+	"github.com/znth-cx/zentag/core/ffmpeg"
+	"github.com/znth-cx/zentag/core/isbn"
+	"github.com/znth-cx/zentag/core/lang"
+	"github.com/znth-cx/zentag/core/mediainfo"
+	"github.com/znth-cx/zentag/core/metadata"
+	"github.com/znth-cx/zentag/core/sources/audnexus"
+	"github.com/znth-cx/zentag/core/sources/files"
 )
 
 // pgup/pgdn hop tabs; handled by pagedForm since huh has no whole-group

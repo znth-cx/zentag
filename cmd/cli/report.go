@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/znth-cx/zentag/core/ruleset"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/znth-cx/zentag/core/ruleset"
 )
 
 // severityOrder: display order, worst (Prohibited) first.

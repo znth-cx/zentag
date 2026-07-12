@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/znth-cx/zentag/core/metadata"
 	"github.com/stretchr/testify/assert"
+	"github.com/znth-cx/zentag/core/metadata"
 )
 
 func TestCheckChapters_M4BTrackWithNoChaptersFlagged(t *testing.T) {
