@@ -36,7 +36,6 @@ func buildArgs(opts WriteOpts) (args []string, cleanup func(), err error) {
 	}
 
 	args = []string{"-y", "-i", opts.InputPath}
-	nextInputIdx := 1
 	chapterInputIdx := -1
 
 	if opts.EmbedChapters && len(opts.Track.Chapters) > 0 {
@@ -47,8 +46,7 @@ func buildArgs(opts WriteOpts) (args []string, cleanup func(), err error) {
 		}
 		cleanups = append(cleanups, cf)
 		args = append(args, "-i", path)
-		chapterInputIdx = nextInputIdx
-		nextInputIdx++
+		chapterInputIdx = 1 // second -i input
 	}
 
 	args = append(args, "-map", "0:a")
