@@ -3,8 +3,8 @@ package ruleset
 import (
 	"testing"
 
-	"github.com/znth-cx/zentag/core/metadata"
 	"github.com/stretchr/testify/assert"
+	"github.com/znth-cx/zentag/core/metadata"
 )
 
 func TestCheckPrimaryKeys_MissingBothISBNAndASIN(t *testing.T) {

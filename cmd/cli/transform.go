@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/spf13/cobra"
 	"github.com/znth-cx/zentag/core/cover"
 	"github.com/znth-cx/zentag/core/ffmpeg"
 	"github.com/znth-cx/zentag/core/mediainfo"
@@ -24,7 +25,6 @@ import (
 	"github.com/znth-cx/zentag/core/writers/FLACEngine"
 	"github.com/znth-cx/zentag/core/writers/M4BEngine"
 	"github.com/znth-cx/zentag/core/writers/MP3Engine"
-	"github.com/spf13/cobra"
 	"golang.org/x/term"
 )
 

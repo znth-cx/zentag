@@ -11,11 +11,11 @@ import (
 	"slices"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/znth-cx/zentag/core/ffmpeg"
 	"github.com/znth-cx/zentag/core/mediainfo"
 	"github.com/znth-cx/zentag/core/metadata"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 // fakeFfmpegRunner serves ffprobe (-show_chapters) and ffmpeg (cover extraction) calls via ffmpeg.Wrapper.
