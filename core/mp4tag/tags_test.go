@@ -76,6 +76,15 @@ func TestBuildTags_YearZeroOmitted(t *testing.T) {
 	}
 }
 
+func TestBuildTags_YearOutOfRangeOmitted(t *testing.T) {
+	for _, y := range []int{-1, metadata.MaxYear + 1, 99999999999} {
+		tags := buildTags(&metadata.Metadata{Title: "Some Book", Year: y})
+		if tags.Year != 0 || tags.Date != "" {
+			t.Errorf("Year %d: got Year=%d Date=%q, want omitted", y, tags.Year, tags.Date)
+		}
+	}
+}
+
 func TestBuildTags_EmptyASINOmittedFromCustom(t *testing.T) {
 	tags := buildTags(&metadata.Metadata{Title: "Some Book", ASIN: ""})
 	if _, ok := tags.Custom["ASIN"]; ok {

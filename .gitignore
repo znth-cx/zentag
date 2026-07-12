@@ -1,2 +1,16 @@
+/zentag
 *.exe
-zentag
+*.test
+coverage.out
+cover.html
+/dist/
+/zentag.yaml
+*.m4b
+*.m4a
+*.mp3
+*.flac
+.vscode/
+.idea/
+Thumbs.db
+Desktop.ini
+.DS_Store
