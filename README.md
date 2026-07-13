@@ -1,8 +1,8 @@
 # zentag
 
-CLI tool for renaming, retagging, and linting audiobook metadata (M4B, MP3, FLAC).
+CLI tool for renaming, retagging, and linting audiobook metadata (M4B, MP3, FLAC), plus ebook organizing and tagging (EPUB, PDF, MOBI, AZW3, DJVU).
 
-> **You are responsible for metadata correctness.** zentag does a best effort fetch for metadata from external sources and the file's metadata to make suggestions. Correct information during in the edit form if it is wrong. It is not zentag's fault if incorrect information was suggested.
+> **You are responsible for metadata correctness.** zentag does a best effort fetch for metadata from external sources and the file's metadata to make suggestions. Correct information in the edit form if it is wrong. It is not zentag's fault if incorrect information was suggested.
 
 ## Required dependencies
 
@@ -10,12 +10,13 @@ Install these before using zentag, and ensure they're on your `PATH` (or point t
 
 - [`ffmpeg`](https://ffmpeg.org/) / `ffprobe`: chapter and tag muxing (MP3/FLAC), chapter remuxing (M4B)
 - [`mediainfo`](https://mediaarea.net/en/MediaInfo): reads back written tags for validation. Make sure to install the CLI version, not the GUI version.
+- [`ebook-meta`](https://calibre-ebook.com/) (part of the calibre install): only needed for the `ebook` command; audiobook commands work without it.
 
 ## Install
 
 ### Linux
 - Download a release from https://github.com/znth-cx/zentag/releases
-- Extract the archive (ex. `tar -xzf zentag_0.1.0_linux_amd64.tar.gz`).
+- Extract the archive (ex. `tar -xzf zentag_<version>_linux_amd64.tar.gz`).
 - Place the binary into your path. The local non-sudo path is `~/.local/bin`.
 - You can now use the zentag command.
 
@@ -30,9 +31,9 @@ Install these before using zentag, and ensure they're on your `PATH` (or point t
 
 ### Post Install
 
-On first run, zentag writes a default config to your user config dir (e.g. `~/.config/zentag/zentag.yaml` on Linux or `%APPDATA%\Roaming\zentag` on Windows) if none exists. Edit it to set:
+On first run, zentag writes a default config to your user config dir (e.g. `~/.config/zentag/zentag.yaml` on Linux or `%APPDATA%\zentag` on Windows) if none exists. Edit it to set:
 
-- `ffmpeg_path`, `ffprobe_path`, `mediainfo_path`: binary locations (default: assume on `PATH`)
+- `ffmpeg_path`, `ffprobe_path`, `mediainfo_path`, `ebook_meta_path`: binary locations (default: assume on `PATH`)
 - `output_dir`: where transformed files go (default: `./zentag-output`)
 - `session_dir`: where in-progress transform sessions are saved (default: user config dir)
 
@@ -60,6 +61,27 @@ zentag transform ./MyBook --asin B0XXXXXXX
 
 Run `zentag transform --help` for the full list of field-override flags (`--author`, `--title`, `--series`, `--cover`, etc.).
 
+### `zentag ebook /path/to/file`
+
+Organizes and tags a single ebook: reads its existing metadata via calibre's `ebook-meta`, merges it with anything you pass via flags, lets you fix fields in an edit form (on a terminal), then copies the file into `output_dir` under a library-style name and tags the copy. Source files are never modified.
+
+```
+zentag ebook ./book.epub --author "Patrick Rothfuss" --isbn 9780756404741
+```
+
+Output layout:
+
+```
+Author - Title [LANG FORMAT]/
+  Author - Title (Year) [LANG FORMAT ISBN].epub
+```
+
+Series go in as `Author - Series - Title [...]` with `Series #Part` in the file name.
+
+- EPUB, PDF, MOBI, AZW3 get tags written; DJVU can't embed metadata, so it's renamed only.
+- ISBN is required unless `--retail` is set (an unmodified digital retail release); retail releases may use ASIN as the identifier instead.
+- `--edition` and `--retail` only affect naming, they're never written into the file.
+
 ## Help
 
 Every command supports `--help`:
@@ -68,13 +90,14 @@ Every command supports `--help`:
 zentag --help
 zentag transform --help
 zentag check --help
+zentag ebook --help
 ```
 
 Global flags: `--config <path>` (override config file location), `-v`/`--verbose` (debug logging).
 
 ## Build
 
-Requires Go 1.26.4+.
+Requires Go 1.26.5+.
 
 ```
 go build -o zentag ./cmd/cli/
