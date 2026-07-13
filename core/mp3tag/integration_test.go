@@ -61,16 +61,16 @@ func TestWriteTags_Integration(t *testing.T) {
 		t.Errorf("TITLE = %v, want Test Book", tags["TITLE"])
 	}
 
-	if tags["TXXX:NARRATOR"][0] != "Test Narrator" {
-		t.Errorf("TXXX:NARRATOR = %v, want Test Narrator", tags["TXXX:NARRATOR"])
+	if tags["NARRATOR"][0] != "Test Narrator" {
+		t.Errorf("NARRATOR = %v, want Test Narrator", tags["NARRATOR"])
 	}
 
-	if tags["TXXX:SERIES"][0] != "Test Series" {
-		t.Errorf("TXXX:SERIES = %v, want Test Series", tags["TXXX:SERIES"])
+	if tags["SERIES"][0] != "Test Series" {
+		t.Errorf("SERIES = %v, want Test Series", tags["SERIES"])
 	}
 
-	if tags["TXXX:ISBN"][0] != "9781234567890" {
-		t.Errorf("TXXX:ISBN = %v, want 9781234567890", tags["TXXX:ISBN"])
+	if tags["ISBN"][0] != "9781234567890" {
+		t.Errorf("ISBN = %v, want 9781234567890", tags["ISBN"])
 	}
 
 	if tags["TRACKNUMBER"][0] != "1/1" {

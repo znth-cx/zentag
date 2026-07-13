@@ -37,12 +37,12 @@ func TestBuildID3Tags_FullFields(t *testing.T) {
 		t.Errorf("TITLE = %v, want The Way of Kings", got["TITLE"])
 	}
 
-	if got["TXXX:NARRATOR"][0] != "Michael Kramer;Kate Reading" {
-		t.Errorf("TXXX:NARRATOR = %v, want Michael Kramer;Kate Reading", got["TXXX:NARRATOR"])
+	if got["NARRATOR"][0] != "Michael Kramer;Kate Reading" {
+		t.Errorf("NARRATOR = %v, want Michael Kramer;Kate Reading", got["NARRATOR"])
 	}
 
-	if got["TXXX:SERIES"][0] != "Stormlight Archive" {
-		t.Errorf("TXXX:SERIES = %v, want Stormlight Archive", got["TXXX:SERIES"])
+	if got["SERIES"][0] != "Stormlight Archive" {
+		t.Errorf("SERIES = %v, want Stormlight Archive", got["SERIES"])
 	}
 
 	if _, exists := got["DISCNUMBER"]; exists {
@@ -57,12 +57,12 @@ func TestBuildID3Tags_FullFields(t *testing.T) {
 		t.Errorf("TITLESORT = %v, want Stormlight Archive 1", got["TITLESORT"])
 	}
 
-	if got["TXXX:ISBN"][0] != "9780765326355" {
-		t.Errorf("TXXX:ISBN = %v, want 9780765326355", got["TXXX:ISBN"])
+	if got["ISBN"][0] != "9780765326355" {
+		t.Errorf("ISBN = %v, want 9780765326355", got["ISBN"])
 	}
 
-	if got["TXXX:ASIN"][0] != "B0041OW6EG" {
-		t.Errorf("TXXX:ASIN = %v, want B0041OW6EG", got["TXXX:ASIN"])
+	if got["ASIN"][0] != "B0041OW6EG" {
+		t.Errorf("ASIN = %v, want B0041OW6EG", got["ASIN"])
 	}
 
 	if got["LANGUAGE"][0] != "eng" {
@@ -92,24 +92,24 @@ func TestBuildID3Tags_OmitsEmptyFields(t *testing.T) {
 		t.Error("DATE should not exist when Year=0")
 	}
 
-	if _, exists := got["TXXX:ASIN"]; exists {
-		t.Error("TXXX:ASIN should not exist when empty")
+	if _, exists := got["ASIN"]; exists {
+		t.Error("ASIN should not exist when empty")
 	}
 
-	if _, exists := got["TXXX:ISBN"]; exists {
-		t.Error("TXXX:ISBN should not exist when empty")
+	if _, exists := got["ISBN"]; exists {
+		t.Error("ISBN should not exist when empty")
 	}
 
-	if _, exists := got["TXXX:NARRATOR"]; exists {
-		t.Error("TXXX:NARRATOR should not exist when empty")
+	if _, exists := got["NARRATOR"]; exists {
+		t.Error("NARRATOR should not exist when empty")
 	}
 
-	if _, exists := got["TXXX:SERIES"]; exists {
-		t.Error("TXXX:SERIES should not exist when empty")
+	if _, exists := got["SERIES"]; exists {
+		t.Error("SERIES should not exist when empty")
 	}
 
-	if _, exists := got["TXXX:SERIES-PART"]; exists {
-		t.Error("TXXX:SERIES-PART should not exist when empty")
+	if _, exists := got["SERIES-PART"]; exists {
+		t.Error("SERIES-PART should not exist when empty")
 	}
 
 	if _, exists := got["COMMENT"]; exists {
@@ -161,12 +161,12 @@ func TestBuildID3Tags_MultipleSeriesEntries(t *testing.T) {
 
 	got := buildID3Tags(m, track)
 
-	if len(got["TXXX:SERIES"]) != 2 {
-		t.Errorf("TXXX:SERIES length = %d, want 2", len(got["TXXX:SERIES"]))
+	if len(got["SERIES"]) != 2 {
+		t.Errorf("SERIES length = %d, want 2", len(got["SERIES"]))
 	}
 
-	if len(got["TXXX:SERIES-PART"]) != 2 {
-		t.Errorf("TXXX:SERIES-PART length = %d, want 2", len(got["TXXX:SERIES-PART"]))
+	if len(got["SERIES-PART"]) != 2 {
+		t.Errorf("SERIES-PART length = %d, want 2", len(got["SERIES-PART"]))
 	}
 }
 
@@ -222,7 +222,7 @@ func TestBuildID3Tags_EscapedFields(t *testing.T) {
 	got := buildID3Tags(m, track)
 
 	expectedNarrator := "Narrator\\;With\\;Semicolons"
-	if got["TXXX:NARRATOR"][0] != expectedNarrator {
-		t.Errorf("TXXX:NARRATOR = %v, want %v", got["TXXX:NARRATOR"][0], expectedNarrator)
+	if got["NARRATOR"][0] != expectedNarrator {
+		t.Errorf("NARRATOR = %v, want %v", got["NARRATOR"][0], expectedNarrator)
 	}
 }

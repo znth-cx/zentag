@@ -47,28 +47,28 @@ func buildID3Tags(m *metadata.Metadata, track metadata.Track) map[string][]strin
 	}
 
 	if len(m.Narrator) > 0 {
-		tags["TXXX:NARRATOR"] = []string{metadata.JoinTags(m.Narrator)}
+		tags["NARRATOR"] = []string{metadata.JoinTags(m.Narrator)}
 	}
 
 	if len(m.Series) > 0 {
 		seriesNames, seriesParts := metadata.SeriesNamesParts(m.Series)
 		if len(seriesNames) > 0 {
-			tags["TXXX:SERIES"] = seriesNames
+			tags["SERIES"] = seriesNames
 		}
 		if len(seriesParts) > 0 {
-			tags["TXXX:SERIES-PART"] = seriesParts
+			tags["SERIES-PART"] = seriesParts
 		}
 	}
 
 	if m.ISBN != "" {
-		tags["TXXX:ISBN"] = []string{m.ISBN}
+		tags["ISBN"] = []string{m.ISBN}
 	}
 
 	if m.ASIN != "" {
-		tags["TXXX:ASIN"] = []string{m.ASIN}
+		tags["ASIN"] = []string{m.ASIN}
 	}
 
-	tags["TXXX:ZENTAG"] = []string{version.Version}
+	tags["ZENTAG"] = []string{version.Version}
 
 	return tags
 }
