@@ -21,6 +21,7 @@ func buildTags(m *metadata.Metadata) *mp4.MP4Tags {
 		Album:       m.Title,
 		Artist:      author,
 		AlbumArtist: author,
+		Narrator:    narrator,
 		Composer:    narrator,
 		Description: m.Description,
 		Comment:     m.Description,
