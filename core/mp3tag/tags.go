@@ -13,27 +13,31 @@ func buildID3Tags(m *metadata.Metadata, track metadata.Track) map[string][]strin
 	tags := make(map[string][]string)
 
 	tags[taglib.Title] = []string{m.Title}
-	tags[taglib.Artist] = m.Author
 	tags[taglib.Album] = []string{m.Title}
-	tags[taglib.AlbumArtist] = m.Author
+
+	tags[taglib.Artist] = []string{metadata.JoinTags(m.Author)}
+	tags[taglib.AlbumArtist] = []string{metadata.JoinTags(m.Author)}
+	tags["AUTHOR"] = []string{metadata.JoinTags(m.Author)}
+
 	tags[taglib.Label] = m.Publisher
+	tags["PUBLISHER"] = m.Publisher
 
 	if m.Year > 0 && m.Year <= metadata.MaxYear {
 		tags[taglib.Date] = []string{strconv.Itoa(m.Year)}
+		tags["YEAR"] = []string{strconv.Itoa(m.Year)}
 	}
-
-	tags[taglib.Composer] = m.Narrator
 
 	if m.Description != "" {
 		tags[taglib.Comment] = []string{m.Description}
 	}
 
 	if len(m.Genre) > 0 {
-		tags[taglib.Genre] = m.Genre
+		tags[taglib.Genre] = []string{metadata.JoinTags(m.Genre)}
 	}
 
 	if m.Language != "" {
 		tags[taglib.Language] = []string{m.Language}
+		tags["LANGUAGE"] = []string{m.Language}
 	}
 
 	if track.PartNumber > 0 {
@@ -44,19 +48,22 @@ func buildID3Tags(m *metadata.Metadata, track metadata.Track) map[string][]strin
 
 	if m.Subtitle != "" {
 		tags[taglib.TitleSort] = []string{m.Subtitle}
+		tags[taglib.Subtitle] = []string{m.Subtitle}
 	}
 
 	if len(m.Narrator) > 0 {
+		tags[taglib.Composer] = []string{metadata.JoinTags(m.Narrator)}
+		tags[taglib.Performer] = []string{metadata.JoinTags(m.Narrator)}
 		tags["NARRATOR"] = []string{metadata.JoinTags(m.Narrator)}
 	}
 
 	if len(m.Series) > 0 {
 		seriesNames, seriesParts := metadata.SeriesNamesParts(m.Series)
 		if len(seriesNames) > 0 {
-			tags["SERIES"] = seriesNames
+			tags["SERIES"] = []string{metadata.JoinTags(seriesNames)}
 		}
 		if len(seriesParts) > 0 {
-			tags["SERIES-PART"] = seriesParts
+			tags["SERIES-PART"] = []string{metadata.JoinTags(seriesParts)}
 		}
 	}
 
