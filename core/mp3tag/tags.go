@@ -47,7 +47,6 @@ func buildID3Tags(m *metadata.Metadata, track metadata.Track) map[string][]strin
 	}
 
 	if m.Subtitle != "" {
-		tags[taglib.TitleSort] = []string{m.Subtitle}
 		tags[taglib.Subtitle] = []string{m.Subtitle}
 	}
 
