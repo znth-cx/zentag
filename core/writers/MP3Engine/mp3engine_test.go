@@ -7,6 +7,7 @@ import (
 
 	"github.com/znth-cx/zentag/core/ffmpeg"
 	"github.com/znth-cx/zentag/core/metadata"
+	"go.senan.xyz/taglib"
 )
 
 type fakeRunner struct {
@@ -18,8 +19,18 @@ func (f *fakeRunner) Run(_ context.Context, _ string, args []string) ([]byte, er
 	return nil, nil
 }
 
+type fakeMP3TagWriter struct{}
+
+func (f *fakeMP3TagWriter) WriteTags(_ context.Context, path string, _ *metadata.Metadata, _ metadata.Track) error {
+	if path == "" {
+		return taglib.ErrSavingFile
+	}
+	return nil
+}
+
 func TestWrite_OneCallPerTrackNoCoverNoChapters(t *testing.T) {
 	fr := &fakeRunner{}
+	ft := &fakeMP3TagWriter{}
 	w := &ffmpeg.Wrapper{BinPath: "ffmpeg", Runner: fr}
 
 	meta := &metadata.Metadata{
@@ -32,6 +43,7 @@ func TestWrite_OneCallPerTrackNoCoverNoChapters(t *testing.T) {
 		},
 	}
 
+	writeMP3Tags = ft.WriteTags
 	if err := Write(context.Background(), w, meta, "out", []string{"001. Chapter One - Some Book (0)", "002. Chapter Two - Some Book (0)"}); err != nil {
 		t.Fatalf("Write() error = %v", err)
 	}
