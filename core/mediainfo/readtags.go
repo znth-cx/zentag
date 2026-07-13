@@ -71,7 +71,7 @@ func parseTagSet(general, audio *mediainfoTrack) TagSet {
 	}
 
 	if year := extra["year"]; year != "" {
-		if y, err := strconv.Atoi(year); err == nil && y > 0 && y <= metadata.MaxYear {
+		if y, err := strconv.Atoi(year); err == nil && y > 0 {
 			tags.Year = y
 		}
 	}

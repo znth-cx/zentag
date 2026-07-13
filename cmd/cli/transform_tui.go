@@ -1000,8 +1000,8 @@ func validateYear(s string) error {
 		return nil
 	}
 	n, err := strconv.Atoi(s)
-	if err != nil || n <= 0 || n > metadata.MaxYear {
-		return fmt.Errorf("year must be a positive number up to %d", metadata.MaxYear)
+	if err != nil || n <= 0 {
+		return fmt.Errorf("year must be a positive number")
 	}
 	return nil
 }

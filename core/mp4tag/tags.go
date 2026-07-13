@@ -30,7 +30,7 @@ func buildTags(m *metadata.Metadata) *mp4.MP4Tags {
 
 	put := func(name, val string) { tags.Custom[name] = val }
 	put("AUTHOR", author)
-	if m.Year > 0 && m.Year <= metadata.MaxYear {
+	if m.Year > 0 {
 		tags.Year = int32(m.Year)
 		tags.Date = fmt.Sprint(m.Year)
 		put("YEAR", fmt.Sprint(m.Year))
