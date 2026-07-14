@@ -993,7 +993,7 @@ func runEditForm(ctx context.Context, in io.Reader, out io.Writer, m *metadata.M
 	return &out2, !aborted && confirmWrite, nil
 }
 
-// validateYear accepts blank (unset) or a positive integer up to metadata.MaxYear.
+// validateYear accepts blank (unset) or a positive integer.
 func validateYear(s string) error {
 	s = strings.TrimSpace(s)
 	if s == "" {

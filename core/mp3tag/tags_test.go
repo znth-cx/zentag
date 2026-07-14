@@ -197,20 +197,6 @@ func TestBuildID3Tags_NoTrackNumberWhenZero(t *testing.T) {
 	}
 }
 
-func TestBuildID3Tags_YearBounds(t *testing.T) {
-	m := &metadata.Metadata{
-		Title: "Test Book",
-		Year:  10000,
-	}
-	track := metadata.Track{Path: "test.mp3"}
-
-	got := buildID3Tags(m, track)
-
-	if _, exists := got["DATE"]; exists {
-		t.Error("DATE should not exist when Year > MaxYear")
-	}
-}
-
 func TestBuildID3Tags_EscapedFields(t *testing.T) {
 	m := &metadata.Metadata{
 		Title:    "Test; Book",

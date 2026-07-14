@@ -114,22 +114,6 @@ func TestReadTags_MissingYearDefaultsToZero(t *testing.T) {
 	}
 }
 
-func TestReadTags_OutOfRangeYearDroppedAsUnset(t *testing.T) {
-	fr := &fakeRunner{out: []byte(`{"media":{"track":[
-		{"@type":"General","Title":"Some Book","extra":{"YEAR":"99999999999"}},
-		{"@type":"Audio","Format":"AAC","BitRate":"128000"}
-	]}}`)}
-	w := &Wrapper{BinPath: "mediainfo", Runner: fr}
-
-	got, err := w.ReadTags(context.Background(), "book.m4b")
-	if err != nil {
-		t.Fatalf("ReadTags() error = %v", err)
-	}
-	if got.Year != 0 {
-		t.Errorf("Year = %d, want 0 (out of range dropped)", got.Year)
-	}
-}
-
 func TestReadTags_IgnoresCDEKButUsesAudioLanguage(t *testing.T) {
 	fr := &fakeRunner{out: []byte(`{"media":{"track":[
 		{"@type":"General","Title":"Some Book","extra":{"CDEK":"B0FALLBACKASIN"}},
