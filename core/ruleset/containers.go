@@ -18,8 +18,9 @@ func CheckLossyContainer(meta *metadata.Metadata) []Violation {
 	}
 
 	var violations []Violation
+	seen := make(map[string]bool)
 
-	for i, track := range meta.Tracks {
+	for _, track := range meta.Tracks {
 		container := strings.ToLower(track.Container)
 		codec := strings.ToLower(track.Codec)
 
@@ -30,10 +31,15 @@ func CheckLossyContainer(meta *metadata.Metadata) []Violation {
 		}
 
 		if container != "m4b" {
+			key := container + "|" + codec
+			if seen[key] {
+				continue
+			}
+			seen[key] = true
 			violations = append(violations, Violation{
 				Rule:     "lossy_container",
 				Severity: SeverityUpgradable,
-				Message:  fmt.Sprintf("track %d: container %q with codec %q should be M4B", i+1, track.Container, track.Codec),
+				Message:  fmt.Sprintf("container %q with codec %q should be M4B", track.Container, track.Codec),
 			})
 		}
 	}

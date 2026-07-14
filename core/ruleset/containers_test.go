@@ -90,6 +90,16 @@ func TestCheckLossyContainer(t *testing.T) {
 			wantViolLen: 2,
 		},
 		{
+			name: "Multi-file same invalid combo deduped to one",
+			tracks: []metadata.Track{
+				{Path: "part1.mp3", Container: "MP3", Codec: "MP3"},
+				{Path: "part2.mp3", Container: "MP3", Codec: "MP3"},
+				{Path: "part3.mp3", Container: "MP3", Codec: "MP3"},
+			},
+			wantViolLen: 1,
+			wantMsg:     "container \"MP3\" with codec \"MP3\" should be M4B",
+		},
+		{
 			name: "ALAC codec (lossless)",
 			tracks: []metadata.Track{
 				{Path: "test.m4a", Container: "M4A", Codec: "ALAC"},
