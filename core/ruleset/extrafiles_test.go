@@ -44,7 +44,8 @@ func TestCheckExtraFiles(t *testing.T) {
 				}
 				return os.WriteFile(filepath.Join(dir, "description.txt"), []byte("test"), 0644)
 			},
-			wantViolLen: 0,
+			wantViolLen: 1,
+			wantMsg:     "unexpected file",
 		},
 		{
 			name: "M4B directory with extra .jpg (not cover.jpg)",
@@ -183,7 +184,8 @@ func TestCheckExtraFiles(t *testing.T) {
 				}
 				return os.WriteFile(filepath.Join(dir, "info.nfo"), []byte("test"), 0644)
 			},
-			wantViolLen: 0,
+			wantViolLen: 1,
+			wantMsg:     "unexpected file",
 		},
 		{
 			name: "Directory with metadata.json",
@@ -231,7 +233,8 @@ func TestCheckExtraFiles(t *testing.T) {
 				}
 				return os.WriteFile(filepath.Join(dir, "playlist.m3u"), []byte("test"), 0644)
 			},
-			wantViolLen: 0,
+			wantViolLen: 1,
+			wantMsg:     "unexpected file",
 		},
 		{
 			name: "Directory with .m3u8 playlist",
@@ -247,7 +250,8 @@ func TestCheckExtraFiles(t *testing.T) {
 				}
 				return os.WriteFile(filepath.Join(dir, "playlist.m3u8"), []byte("test"), 0644)
 			},
-			wantViolLen: 0,
+			wantViolLen: 1,
+			wantMsg:     "unexpected file",
 		},
 		{
 			name:        "Nil metadata",

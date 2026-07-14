@@ -13,10 +13,6 @@ import (
 
 var ignoredPatterns = []*regexp.Regexp{
 	regexp.MustCompile(`(?i)^metadata\.json$`),
-	regexp.MustCompile(`\.txt$`),
-	regexp.MustCompile(`\.nfo$`),
-	regexp.MustCompile(`\.log$`),
-	regexp.MustCompile(`\.m3u8?$`),
 }
 
 func CheckExtraFiles(ctx context.Context, meta *metadata.Metadata) []Violation {
