@@ -155,6 +155,7 @@ func TestCheckRuleOrderMatchesRulesetKeys(t *testing.T) {
 		"extra_files":            {},
 		"bitrate":                {},
 		"lossy_container":        {},
+		"mixed_format":          {},
 		"flac_md5":               {},
 		"tag_separator_format":   {},
 	}

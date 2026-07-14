@@ -174,3 +174,86 @@ func TestCheckLossyContainerEmptyTracks(t *testing.T) {
 		t.Errorf("CheckLossyContainer() on empty tracks should return empty, got %v", violations)
 	}
 }
+
+func TestCheckMixedFormat(t *testing.T) {
+	tests := []struct {
+		name        string
+		tracks      []metadata.Track
+		wantViolLen int
+		wantMsg     string
+	}{
+		{
+			name:        "Single track no violation",
+			tracks:      []metadata.Track{{Path: "a.m4b", Container: "M4B", Codec: "AAC"}},
+			wantViolLen: 0,
+		},
+		{
+			name: "All tracks same combo no violation",
+			tracks: []metadata.Track{
+				{Path: "p1.mp3", Container: "MP3", Codec: "MP3"},
+				{Path: "p2.mp3", Container: "MP3", Codec: "MP3"},
+				{Path: "p3.mp3", Container: "MP3", Codec: "MP3"},
+			},
+			wantViolLen: 0,
+		},
+		{
+			name: "Same combo different casing no violation",
+			tracks: []metadata.Track{
+				{Path: "p1.mp3", Container: "MP3", Codec: "MP3"},
+				{Path: "p2.MP3", Container: "mp3", Codec: "mp3"},
+			},
+			wantViolLen: 0,
+		},
+		{
+			name: "Mixed MP3 and FLAC prohibited",
+			tracks: []metadata.Track{
+				{Path: "p1.mp3", Container: "MP3", Codec: "MP3"},
+				{Path: "p2.flac", Container: "FLAC", Codec: "FLAC"},
+			},
+			wantViolLen: 1,
+			wantMsg:     `tracks have mixed formats: container "MP3" codec "MP3", container "FLAC" codec "FLAC"`,
+		},
+		{
+			name: "Three distinct combos all listed",
+			tracks: []metadata.Track{
+				{Path: "p1.m4b", Container: "M4B", Codec: "AAC"},
+				{Path: "p2.mp3", Container: "MP3", Codec: "MP3"},
+				{Path: "p3.flac", Container: "FLAC", Codec: "FLAC"},
+			},
+			wantViolLen: 1,
+			wantMsg:     `container "M4B" codec "AAC"`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			meta := &metadata.Metadata{Tracks: tt.tracks}
+			violations := CheckMixedFormat(meta)
+
+			if len(violations) != tt.wantViolLen {
+				t.Fatalf("CheckMixedFormat() violations = %d, want %d (%v)", len(violations), tt.wantViolLen, violations)
+			}
+
+			if tt.wantViolLen == 0 {
+				return
+			}
+
+			v := violations[0]
+			if v.Rule != "mixed_format" {
+				t.Errorf("rule = %q, want mixed_format", v.Rule)
+			}
+			if v.Severity != SeverityProhibited {
+				t.Errorf("severity = %q, want prohibited", v.Severity)
+			}
+			if tt.wantMsg != "" && !contains(v.Message, tt.wantMsg) {
+				t.Errorf("message = %q, want to contain %q", v.Message, tt.wantMsg)
+			}
+		})
+	}
+}
+
+func TestCheckMixedFormatNil(t *testing.T) {
+	if violations := CheckMixedFormat(nil); violations != nil {
+		t.Errorf("CheckMixedFormat(nil) = %v, want nil", violations)
+	}
+}

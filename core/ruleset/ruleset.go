@@ -47,6 +47,7 @@ func Validate(ctx context.Context, meta *metadata.Metadata) []Violation {
 	violations = append(violations, CheckExtraFiles(ctx, meta)...)
 	violations = append(violations, CheckBitrate(meta)...)
 	violations = append(violations, CheckLossyContainer(meta)...)
+	violations = append(violations, CheckMixedFormat(meta)...)
 	violations = append(violations, CheckTagSeparators(meta)...)
 
 	slog.DebugContext(ctx, "ruleset: validation complete", "path", meta.OriginalPath, "violations", len(violations))
@@ -71,8 +72,8 @@ func ValidateWithMediaInfo(ctx context.Context, meta *metadata.Metadata, mi *med
 	violations = append(violations, CheckFormatSpecificTags(meta)...)
 	violations = append(violations, CheckM4BSingleFile(meta)...)
 	violations = append(violations, CheckExtraFiles(ctx, meta)...)
-	violations = append(violations, CheckBitrate(meta)...)
 	violations = append(violations, CheckLossyContainer(meta)...)
+	violations = append(violations, CheckMixedFormat(meta)...)
 	violations = append(violations, CheckFLACMD5(ctx, meta, mi)...)
 	violations = append(violations, CheckTagSeparators(meta)...)
 
