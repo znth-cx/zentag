@@ -17,6 +17,7 @@ func buildID3Tags(m *metadata.Metadata, track metadata.Track) map[string][]strin
 
 	tags[taglib.Artist] = []string{metadata.JoinTags(m.Author)}
 	tags[taglib.AlbumArtist] = []string{metadata.JoinTags(m.Author)}
+	tags[taglib.Performer] = []string{metadata.JoinTags(m.Author)}
 	tags["AUTHOR"] = []string{metadata.JoinTags(m.Author)}
 
 	tags[taglib.Label] = []string{metadata.JoinTags(m.Publisher)}
@@ -52,7 +53,6 @@ func buildID3Tags(m *metadata.Metadata, track metadata.Track) map[string][]strin
 
 	if len(m.Narrator) > 0 {
 		tags[taglib.Composer] = []string{metadata.JoinTags(m.Narrator)}
-		tags[taglib.Performer] = []string{metadata.JoinTags(m.Narrator)}
 		tags["NARRATOR"] = []string{metadata.JoinTags(m.Narrator)}
 	}
 
