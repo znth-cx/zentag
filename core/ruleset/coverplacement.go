@@ -51,14 +51,14 @@ func CheckCoverPlacement(ctx context.Context, meta *metadata.Metadata) []Violati
 
 	case "MP3", "FLAC":
 		coverPath := filepath.Join(meta.OriginalPath, "cover.jpg")
-		if _, err := os.Stat(coverPath); os.IsNotExist(err) {
+		fileInfo, err := os.Stat(coverPath)
+		if os.IsNotExist(err) {
 			violations = append(violations, Violation{
 				Rule:     "cover_placement",
 				Severity: SeverityTrumpable,
 				Message:  "cover.jpg must be present in root directory",
 			})
 		} else if err == nil {
-			fileInfo, _ := os.Stat(coverPath)
 			if fileInfo.Size() > int64(maxCoverSize) {
 				violations = append(violations, Violation{
 					Rule:     "cover_placement",

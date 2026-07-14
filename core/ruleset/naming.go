@@ -13,6 +13,8 @@ import (
 	"github.com/znth-cx/zentag/core/naming"
 )
 
+var partNumberPattern = regexp.MustCompile(`^(\d+)\.`)
+
 // CheckNaming checks RULES.md §3: title must be APA title case, dir/track names must match naming.DirectoryName/naming.TrackName.
 // Returns nil if Author/Title/Narrator/Tracks empty: CheckRequiredTags/CheckPrimaryKeys already flags that gap.
 func CheckNaming(ctx context.Context, meta *metadata.Metadata) []Violation {
@@ -56,7 +58,6 @@ func CheckNaming(ctx context.Context, meta *metadata.Metadata) []Violation {
 			Severity: SeverityTrumpable,
 			Message:  fmt.Sprintf("directory name does not match expected %q", expectedDir),
 		})
-		return violations
 	}
 
 	violations = append(violations, validateSourceToken(ctx, meta)...)
@@ -137,8 +138,7 @@ func validatePartNumberFormat(meta *metadata.Metadata) []Violation {
 		ext := filepath.Ext(baseName)
 		nameWithoutExt := strings.TrimSuffix(baseName, ext)
 
-		re := regexp.MustCompile(`^(\d+)\.`)
-		matches := re.FindStringSubmatch(nameWithoutExt)
+		matches := partNumberPattern.FindStringSubmatch(nameWithoutExt)
 		if len(matches) < 2 {
 			continue
 		}

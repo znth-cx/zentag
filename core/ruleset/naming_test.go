@@ -83,8 +83,20 @@ func TestCheckNaming_MultiFileMismatchedDirectory(t *testing.T) {
 	meta.OriginalPath = "/books/wrong-directory-name"
 
 	violations := CheckNaming(context.Background(), meta)
-	assert.Len(t, violations, 1)
-	assert.Contains(t, violations[0].Message, "directory name")
+	assert.Len(t, violations, 2)
+
+	var hasDirectoryViolation bool
+	var hasSourceTokenViolation bool
+	for _, v := range violations {
+		if strings.Contains(v.Message, "directory name does not match expected") {
+			hasDirectoryViolation = true
+		}
+		if strings.Contains(v.Message, "directory name missing source token") {
+			hasSourceTokenViolation = true
+		}
+	}
+	assert.True(t, hasDirectoryViolation, "should have directory name violation")
+	assert.True(t, hasSourceTokenViolation, "should have source token violation")
 }
 
 func TestCheckNaming_MultiFileMismatchedTrackNameFlagsOnlyThatTrack(t *testing.T) {

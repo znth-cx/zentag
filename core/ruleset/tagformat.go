@@ -20,30 +20,33 @@ func CheckTagSeparators(meta *metadata.Metadata) []Violation {
 		return nil
 	}
 
-	var violations []Violation
+	type tagField struct {
+		name   string
+		values []string
+	}
 
+	fields := []tagField{}
 	for _, field := range multiFields {
 		switch field {
 		case "author":
-			for i, value := range meta.Author {
-				violations = append(violations, validateSeparatorFormat("author", value, i)...)
-			}
+			fields = append(fields, tagField{"author", meta.Author})
 		case "narrator":
-			for i, value := range meta.Narrator {
-				violations = append(violations, validateSeparatorFormat("narrator", value, i)...)
-			}
+			fields = append(fields, tagField{"narrator", meta.Narrator})
 		case "genre":
-			for i, value := range meta.Genre {
-				violations = append(violations, validateSeparatorFormat("genre", value, i)...)
-			}
+			fields = append(fields, tagField{"genre", meta.Genre})
 		case "publisher":
-			for i, value := range meta.Publisher {
-				violations = append(violations, validateSeparatorFormat("publisher", value, i)...)
-			}
+			fields = append(fields, tagField{"publisher", meta.Publisher})
 		case "series":
-			for i, s := range meta.Series {
-				violations = append(violations, validateSeparatorFormat("series", s.Name, i)...)
+			for _, s := range meta.Series {
+				fields = append(fields, tagField{"series", []string{s.Name}})
 			}
+		}
+	}
+
+	var violations []Violation
+	for _, field := range fields {
+		for i, value := range field.values {
+			violations = append(violations, validateSeparatorFormat(field.name, value, i)...)
 		}
 	}
 

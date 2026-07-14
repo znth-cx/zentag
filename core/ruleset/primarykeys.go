@@ -10,6 +10,10 @@ import (
 // CheckPrimaryKeys checks RULES.md §2: needs ISBN or ASIN; if ISBN present, checksum must be valid.
 // Also implements ISBN-13 preference: if both ISBN-10 and ISBN-13 are present, advises ISBN-13 preference.
 func CheckPrimaryKeys(meta *metadata.Metadata) []Violation {
+	if meta == nil {
+		return nil
+	}
+
 	var violations []Violation
 
 	if meta.ISBN == "" && meta.ASIN == "" {

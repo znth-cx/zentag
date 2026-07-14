@@ -12,6 +12,94 @@ var MultiValueTags = map[string][]string{
 	"FLAC": {"author", "narrator", "genre", "publisher", "series"},
 }
 
+type tagCheck struct {
+	fieldName string
+	tagName   string
+	getter    func(*metadata.Metadata) (bool, string)
+}
+
+func getTagChecks(container string) []tagCheck {
+	switch container {
+	case "M4B":
+		return []tagCheck{
+			{fieldName: "author", tagName: ".ART (author)", getter: func(m *metadata.Metadata) (bool, string) {
+				return len(m.Author) == 0 || m.Author[0] == "", "missing required tag .ART (author)"
+			}},
+			{fieldName: "title", tagName: ".nam (title)", getter: func(m *metadata.Metadata) (bool, string) { return m.Title == "", "missing required tag .nam (title)" }},
+			{fieldName: "year", tagName: ".day (year)", getter: func(m *metadata.Metadata) (bool, string) { return m.Year == 0, "missing required tag .day (year)" }},
+			{fieldName: "narrator", tagName: ".wrt (narrator)", getter: func(m *metadata.Metadata) (bool, string) {
+				return len(m.Narrator) == 0 || m.Narrator[0] == "", "missing required tag .wrt (narrator)"
+			}},
+			{fieldName: "language", tagName: "Language (mdhd)", getter: func(m *metadata.Metadata) (bool, string) {
+				return m.Language == "", "missing required tag Language (mdhd)"
+			}},
+		}
+	case "MP3":
+		return []tagCheck{
+			{fieldName: "title", tagName: "TIT2 (title)", getter: func(m *metadata.Metadata) (bool, string) { return m.Title == "", "missing required tag TIT2 (title)" }},
+			{fieldName: "author", tagName: "TPE1 (artist/author)", getter: func(m *metadata.Metadata) (bool, string) {
+				return len(m.Author) == 0 || m.Author[0] == "", "missing required tag TPE1 (artist/author)"
+			}},
+			{fieldName: "year", tagName: "TDRC (year)", getter: func(m *metadata.Metadata) (bool, string) { return m.Year == 0, "missing required tag TDRC (year)" }},
+			{fieldName: "language", tagName: "TLAN (language)", getter: func(m *metadata.Metadata) (bool, string) {
+				return m.Language == "", "missing required tag TLAN (language)"
+			}},
+			{fieldName: "narrator", tagName: "TCOM (composer/narrator)", getter: func(m *metadata.Metadata) (bool, string) {
+				return len(m.Narrator) == 0 || m.Narrator[0] == "", "missing required tag TCOM (composer/narrator)"
+			}},
+		}
+	case "FLAC":
+		return []tagCheck{
+			{fieldName: "author", tagName: "author", getter: func(m *metadata.Metadata) (bool, string) {
+				return len(m.Author) == 0 || m.Author[0] == "", "missing required tag author"
+			}},
+			{fieldName: "title", tagName: "title", getter: func(m *metadata.Metadata) (bool, string) { return m.Title == "", "missing required tag title" }},
+			{fieldName: "year", tagName: "year", getter: func(m *metadata.Metadata) (bool, string) { return m.Year == 0, "missing required tag year" }},
+			{fieldName: "narrator", tagName: "narrator", getter: func(m *metadata.Metadata) (bool, string) {
+				return len(m.Narrator) == 0 || m.Narrator[0] == "", "missing required tag narrator"
+			}},
+			{fieldName: "language", tagName: "language", getter: func(m *metadata.Metadata) (bool, string) { return m.Language == "", "missing required tag language" }},
+		}
+	default:
+		return nil
+	}
+}
+
+func getSeriesTag(container string) (tagName, message string) {
+	switch container {
+	case "M4B":
+		return "----com.apple.iTunes:SERIES-PART", "missing required tag ----com.apple.iTunes:SERIES-PART"
+	case "MP3":
+		return "TXXX:SERIES-PART", "missing required tag TXXX:SERIES-PART"
+	case "FLAC":
+		return "series-part", "missing required tag series-part"
+	default:
+		return "", ""
+	}
+}
+
+func getISBNTag(container string) (tagName, message string) {
+	switch container {
+	case "M4B":
+		return "----com.apple.iTunes:ISBN or ----com.apple.iTunes:ASIN", "missing required tag ----com.apple.iTunes:ISBN or ----com.apple.iTunes:ASIN"
+	case "MP3":
+		return "TXXX:ISBN or TXXX:ASIN", "missing required tag TXXX:ISBN or TXXX:ASIN"
+	case "FLAC":
+		return "isbn or asin", "missing required tag isbn or asin"
+	default:
+		return "", ""
+	}
+}
+
+func getCoverTag(container string) (tagName, message string) {
+	switch container {
+	case "M4B":
+		return "covr (cover image)", "missing required tag covr (cover image)"
+	default:
+		return "", ""
+	}
+}
+
 // CheckFormatSpecificTags validates format-specific required tags per RULES.md §4.
 // It dispatches to the appropriate format-specific checker based on the container type.
 func CheckFormatSpecificTags(meta *metadata.Metadata) []Violation {
@@ -20,247 +108,52 @@ func CheckFormatSpecificTags(meta *metadata.Metadata) []Violation {
 	}
 
 	container := meta.Tracks[0].Container
-	switch container {
-	case "M4B":
-		return CheckM4BTags(meta)
-	case "MP3":
-		return CheckMP3Tags(meta)
-	case "FLAC":
-		return CheckFLACTags(meta)
-	default:
-		// Unknown container type, skip gracefully
+	checks := getTagChecks(container)
+	if checks == nil {
 		return nil
 	}
-}
 
-// CheckM4BTags validates M4B-specific required tags per RULES.md §4.
-// Checks: Author, Title, Year, Narrator, Series/Part, Language, ISBN/ASIN, Cover.
-func CheckM4BTags(meta *metadata.Metadata) []Violation {
 	var violations []Violation
+	containerPrefix := container + ": "
 
-	// .ART (author)
-	if len(meta.Author) == 0 || meta.Author[0] == "" {
-		violations = append(violations, Violation{
-			Rule:     "format_specific_tags",
-			Severity: SeverityTrumpable,
-			Message:  "M4B: missing required tag .ART (author)",
-		})
+	for _, check := range checks {
+		if missing, msg := check.getter(meta); missing {
+			violations = append(violations, Violation{
+				Rule:     "format_specific_tags",
+				Severity: SeverityTrumpable,
+				Message:  containerPrefix + msg,
+			})
+		}
 	}
 
-	// .nam (title)
-	if meta.Title == "" {
-		violations = append(violations, Violation{
-			Rule:     "format_specific_tags",
-			Severity: SeverityTrumpable,
-			Message:  "M4B: missing required tag .nam (title)",
-		})
-	}
-
-	// .day (year)
-	if meta.Year == 0 {
-		violations = append(violations, Violation{
-			Rule:     "format_specific_tags",
-			Severity: SeverityTrumpable,
-			Message:  "M4B: missing required tag .day (year)",
-		})
-	}
-
-	// .wrt (narrator)
-	if len(meta.Narrator) == 0 || meta.Narrator[0] == "" {
-		violations = append(violations, Violation{
-			Rule:     "format_specific_tags",
-			Severity: SeverityTrumpable,
-			Message:  "M4B: missing required tag .wrt (narrator)",
-		})
-	}
-
-	// Language (mdhd)
-	if meta.Language == "" {
-		violations = append(violations, Violation{
-			Rule:     "format_specific_tags",
-			Severity: SeverityTrumpable,
-			Message:  "M4B: missing required tag Language (mdhd)",
-		})
-	}
-
-	// Series/Part
-	if len(meta.Series) > 0 {
+	seriesTag, seriesMsg := getSeriesTag(container)
+	if seriesTag != "" && len(meta.Series) > 0 {
 		for _, s := range meta.Series {
 			if s.Part == "" {
 				violations = append(violations, Violation{
 					Rule:     "format_specific_tags",
 					Severity: SeverityTrumpable,
-					Message:  "M4B: missing required tag ----com.apple.iTunes:SERIES-PART",
+					Message:  containerPrefix + seriesMsg,
 				})
 			}
 		}
 	}
 
-	// ISBN/ASIN (at least one required)
-	if meta.ISBN == "" && meta.ASIN == "" {
+	isbnTag, isbnMsg := getISBNTag(container)
+	if isbnTag != "" && meta.ISBN == "" && meta.ASIN == "" {
 		violations = append(violations, Violation{
 			Rule:     "format_specific_tags",
 			Severity: SeverityTrumpable,
-			Message:  "M4B: missing required tag ----com.apple.iTunes:ISBN or ----com.apple.iTunes:ASIN",
+			Message:  containerPrefix + isbnMsg,
 		})
 	}
 
-	// covr (embedded cover)
-	if len(meta.CoverImage) == 0 {
+	coverTag, coverMsg := getCoverTag(container)
+	if coverTag != "" && len(meta.CoverImage) == 0 {
 		violations = append(violations, Violation{
 			Rule:     "format_specific_tags",
 			Severity: SeverityTrumpable,
-			Message:  "M4B: missing required tag covr (cover image)",
-		})
-	}
-
-	return violations
-}
-
-// CheckMP3Tags validates MP3-specific required tags per RULES.md §4.
-// Checks: Title, Author, Year, Language, Narrator, Series/Part, ISBN/ASIN.
-func CheckMP3Tags(meta *metadata.Metadata) []Violation {
-	var violations []Violation
-
-	// TIT2 (title)
-	if meta.Title == "" {
-		violations = append(violations, Violation{
-			Rule:     "format_specific_tags",
-			Severity: SeverityTrumpable,
-			Message:  "MP3: missing required tag TIT2 (title)",
-		})
-	}
-
-	// TPE1 (artist/author)
-	if len(meta.Author) == 0 || meta.Author[0] == "" {
-		violations = append(violations, Violation{
-			Rule:     "format_specific_tags",
-			Severity: SeverityTrumpable,
-			Message:  "MP3: missing required tag TPE1 (artist/author)",
-		})
-	}
-
-	// TDRC (recording time/year)
-	if meta.Year == 0 {
-		violations = append(violations, Violation{
-			Rule:     "format_specific_tags",
-			Severity: SeverityTrumpable,
-			Message:  "MP3: missing required tag TDRC (year)",
-		})
-	}
-
-	// TLAN (language)
-	if meta.Language == "" {
-		violations = append(violations, Violation{
-			Rule:     "format_specific_tags",
-			Severity: SeverityTrumpable,
-			Message:  "MP3: missing required tag TLAN (language)",
-		})
-	}
-
-	// TCOM (composer/narrator)
-	if len(meta.Narrator) == 0 || meta.Narrator[0] == "" {
-		violations = append(violations, Violation{
-			Rule:     "format_specific_tags",
-			Severity: SeverityTrumpable,
-			Message:  "MP3: missing required tag TCOM (composer/narrator)",
-		})
-	}
-
-	// Series/Part
-	if len(meta.Series) > 0 {
-		for _, s := range meta.Series {
-			if s.Part == "" {
-				violations = append(violations, Violation{
-					Rule:     "format_specific_tags",
-					Severity: SeverityTrumpable,
-					Message:  "MP3: missing required tag TXXX:SERIES-PART",
-				})
-			}
-		}
-	}
-
-	// ISBN/ASIN (at least one required)
-	if meta.ISBN == "" && meta.ASIN == "" {
-		violations = append(violations, Violation{
-			Rule:     "format_specific_tags",
-			Severity: SeverityTrumpable,
-			Message:  "MP3: missing required tag TXXX:ISBN or TXXX:ASIN",
-		})
-	}
-
-	return violations
-}
-
-// CheckFLACTags validates FLAC-specific required tags per RULES.md §4.
-// Checks: Author, Title, Year, Narrator, Series/Part, Language, ISBN/ASIN.
-func CheckFLACTags(meta *metadata.Metadata) []Violation {
-	var violations []Violation
-
-	// author
-	if len(meta.Author) == 0 || meta.Author[0] == "" {
-		violations = append(violations, Violation{
-			Rule:     "format_specific_tags",
-			Severity: SeverityTrumpable,
-			Message:  "FLAC: missing required tag author",
-		})
-	}
-
-	// title
-	if meta.Title == "" {
-		violations = append(violations, Violation{
-			Rule:     "format_specific_tags",
-			Severity: SeverityTrumpable,
-			Message:  "FLAC: missing required tag title",
-		})
-	}
-
-	// year
-	if meta.Year == 0 {
-		violations = append(violations, Violation{
-			Rule:     "format_specific_tags",
-			Severity: SeverityTrumpable,
-			Message:  "FLAC: missing required tag year",
-		})
-	}
-
-	// narrator
-	if len(meta.Narrator) == 0 || meta.Narrator[0] == "" {
-		violations = append(violations, Violation{
-			Rule:     "format_specific_tags",
-			Severity: SeverityTrumpable,
-			Message:  "FLAC: missing required tag narrator",
-		})
-	}
-
-	// language
-	if meta.Language == "" {
-		violations = append(violations, Violation{
-			Rule:     "format_specific_tags",
-			Severity: SeverityTrumpable,
-			Message:  "FLAC: missing required tag language",
-		})
-	}
-
-	// series/series-part
-	if len(meta.Series) > 0 {
-		for _, s := range meta.Series {
-			if s.Part == "" {
-				violations = append(violations, Violation{
-					Rule:     "format_specific_tags",
-					Severity: SeverityTrumpable,
-					Message:  "FLAC: missing required tag series-part",
-				})
-			}
-		}
-	}
-
-	// isbn/asin (at least one required)
-	if meta.ISBN == "" && meta.ASIN == "" {
-		violations = append(violations, Violation{
-			Rule:     "format_specific_tags",
-			Severity: SeverityTrumpable,
-			Message:  "FLAC: missing required tag isbn or asin",
+			Message:  containerPrefix + coverMsg,
 		})
 	}
 

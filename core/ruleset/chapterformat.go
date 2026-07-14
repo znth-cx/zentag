@@ -42,6 +42,8 @@ func CheckChapterFormat(ctx context.Context, meta *metadata.Metadata) []Violatio
 
 // detectChapterFormat detects the chapter format used in the file.
 // Returns "QuickTime", "Nero", or an error if format cannot be determined.
+// TODO: Implement proper chapter format detection using ffmpeg or mediainfo.
+// Currently returns QuickTime as default since it's the required format per RULES.md §9.
 func detectChapterFormat(ctx context.Context, track *metadata.Track) (string, error) {
 	if track == nil {
 		return "", fmt.Errorf("track is nil")
@@ -53,5 +55,6 @@ func detectChapterFormat(ctx context.Context, track *metadata.Track) (string, er
 
 	slog.DebugContext(ctx, "ruleset: detecting chapter format", "path", track.Path, "chapters", len(track.Chapters))
 
+	slog.WarnContext(ctx, "ruleset: chapter format detection not implemented, assuming QuickTime", "path", track.Path)
 	return "QuickTime", nil
 }

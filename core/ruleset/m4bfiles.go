@@ -26,7 +26,13 @@ func CheckM4BSingleFile(meta *metadata.Metadata) []Violation {
 	allDiscNamed := true
 	for _, tr := range meta.Tracks {
 		baseName := filepath.Base(tr.Path)
-		nameWithoutExt := baseName[:len(baseName)-len(filepath.Ext(baseName))]
+		ext := filepath.Ext(baseName)
+		var nameWithoutExt string
+		if ext == "" {
+			nameWithoutExt = baseName
+		} else {
+			nameWithoutExt = baseName[:len(baseName)-len(ext)]
+		}
 
 		if !discPattern.MatchString(nameWithoutExt) {
 			allDiscNamed = false
