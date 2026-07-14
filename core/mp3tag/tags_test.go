@@ -53,8 +53,8 @@ func TestBuildID3Tags_FullFields(t *testing.T) {
 		t.Errorf("TRACKNUMBER = %v, want 1/1", got["TRACKNUMBER"])
 	}
 
-	if got["TITLESORT"][0] != "Stormlight Archive 1" {
-		t.Errorf("TITLESORT = %v, want Stormlight Archive 1", got["TITLESORT"])
+	if got["SUBTITLE"][0] != "Stormlight Archive 1" {
+		t.Errorf("SUBTITLE = %v, want Stormlight Archive 1", got["SUBTITLE"])
 	}
 
 	if got["ISBN"][0] != "9780765326355" {

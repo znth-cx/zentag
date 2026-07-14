@@ -128,6 +128,59 @@ func TestCheckCmd_RunE_CleanPassage(t *testing.T) {
 		Year:     2020,
 		Narrator: []string{"Test Narrator"},
 		Language: "eng",
+		Source:   metadata.ReleaseSourceWEB,
+		Tracks: []metadata.Track{
+			{Container: "M4B", Codec: "AAC", Bitrate: 64},
+		},
+	}
+	ctx := context.Background()
+	dirName, err := naming.DirectoryName(ctx, meta)
+	require.NoError(t, err)
+
+	root := t.TempDir()
+	bookDir := filepath.Join(root, dirName)
+	require.NoError(t, os.MkdirAll(bookDir, 0o755))
+	file1 := filepath.Join(bookDir, dirName+".m4b")
+	require.NoError(t, os.WriteFile(file1, nil, 0o644))
+
+	extra1 := `{"author":"Test Author","narrator":"Test Narrator","isbn":"9780765326355","year":"2020","language":"eng"}`
+	cover := pngBytes(t, 100, 100)
+
+	mi := &mediainfo.Wrapper{Runner: &fakeMediainfoRunner{
+		responses: map[string]string{
+			file1: mediainfoJSON(extra1, "AAC", "", 64),
+		},
+	}}
+	fw := &ffmpeg.Wrapper{Runner: &fakeFfmpegRunner{
+		chaptersJSON: `{"chapters":[{"start_time":"0.000000","end_time":"60.000000"}]}`,
+		coverBytes:   map[string][]byte{file1: cover},
+	}}
+	swapWrappers(t, fw, mi)
+
+	var out bytes.Buffer
+	checkCmd.SetContext(ctx)
+	checkCmd.SetOut(&out)
+
+	err = checkCmd.RunE(checkCmd, []string{bookDir})
+	assert.NoError(t, err)
+	assert.Contains(t, out.String(), "✓ primary_keys")
+	assert.Contains(t, out.String(), "✓ naming")
+	assert.NotContains(t, out.String(), "✗")
+}
+
+// TestCheckCmd_RunE_MP3NoSourceFlagsViolations covers the upgradable/trumpable
+// paths an MP3 release with no [Source] token legitimately trips: lossy slot
+// not in M4B (upgradable) and empty source (trumpable).
+func TestCheckCmd_RunE_MP3NoSourceFlagsViolations(t *testing.T) {
+	setTestConfig(t)
+	setJSONOutput(t, false)
+
+	meta := &metadata.Metadata{
+		Author:   []string{"Test Author"},
+		Title:    "Test Book",
+		Year:     2020,
+		Narrator: []string{"Test Narrator"},
+		Language: "eng",
 		Tracks: []metadata.Track{
 			{PartNumber: 1, Container: "", Codec: "MP3", Bitrate: 128},
 			{PartNumber: 2, Container: "", Codec: "MP3", Bitrate: 128},
@@ -169,10 +222,11 @@ func TestCheckCmd_RunE_CleanPassage(t *testing.T) {
 	checkCmd.SetOut(&out)
 
 	err = checkCmd.RunE(checkCmd, []string{bookDir})
-	assert.NoError(t, err)
-	assert.Contains(t, out.String(), "✓ primary_keys")
-	assert.Contains(t, out.String(), "✓ naming")
-	assert.NotContains(t, out.String(), "✗")
+	assert.Error(t, err)
+	assert.Contains(t, out.String(), "✗ source")
+	assert.Contains(t, out.String(), "[trumpable] source field is empty")
+	assert.Contains(t, out.String(), "✗ lossy_container")
+	assert.Contains(t, out.String(), `[upgradable] container "" with codec "MP3" should be M4B`)
 }
 
 func dirtyFixture(t *testing.T) string {
