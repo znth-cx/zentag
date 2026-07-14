@@ -39,6 +39,8 @@ func Validate(ctx context.Context, meta *metadata.Metadata) []Violation {
 	violations = append(violations, CheckAudnexusChapters(meta)...)
 	violations = append(violations, CheckBannedContent(meta)...)
 	violations = append(violations, CheckNaming(ctx, meta)...)
+	violations = append(violations, CheckSource(meta)...)
+	violations = append(violations, CheckFormatSpecificTags(meta)...)
 
 	slog.DebugContext(ctx, "ruleset: validation complete", "path", meta.OriginalPath, "violations", len(violations))
 	return violations
