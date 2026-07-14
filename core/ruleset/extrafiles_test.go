@@ -166,7 +166,8 @@ func TestCheckExtraFiles(t *testing.T) {
 				}
 				return os.WriteFile(filepath.Join(dir, "session.json"), []byte("test"), 0644)
 			},
-			wantViolLen: 0,
+			wantViolLen: 1,
+			wantMsg:     "unexpected file",
 		},
 		{
 			name: "Directory with .nfo file",
@@ -181,6 +182,70 @@ func TestCheckExtraFiles(t *testing.T) {
 					return err
 				}
 				return os.WriteFile(filepath.Join(dir, "info.nfo"), []byte("test"), 0644)
+			},
+			wantViolLen: 0,
+		},
+		{
+			name: "Directory with metadata.json",
+			meta: &metadata.Metadata{
+				OriginalPath: "",
+				Tracks: []metadata.Track{
+					{Container: "MP3"},
+				},
+			},
+			setup: func(dir string) error {
+				if err := os.WriteFile(filepath.Join(dir, "01.mp3"), []byte("test"), 0644); err != nil {
+					return err
+				}
+				return os.WriteFile(filepath.Join(dir, "metadata.json"), []byte("test"), 0644)
+			},
+			wantViolLen: 0,
+		},
+		{
+			name: "Directory with uppercase METADATA.JSON",
+			meta: &metadata.Metadata{
+				OriginalPath: "",
+				Tracks: []metadata.Track{
+					{Container: "MP3"},
+				},
+			},
+			setup: func(dir string) error {
+				if err := os.WriteFile(filepath.Join(dir, "01.mp3"), []byte("test"), 0644); err != nil {
+					return err
+				}
+				return os.WriteFile(filepath.Join(dir, "METADATA.JSON"), []byte("test"), 0644)
+			},
+			wantViolLen: 0,
+		},
+		{
+			name: "Directory with .m3u playlist",
+			meta: &metadata.Metadata{
+				OriginalPath: "",
+				Tracks: []metadata.Track{
+					{Container: "MP3"},
+				},
+			},
+			setup: func(dir string) error {
+				if err := os.WriteFile(filepath.Join(dir, "01.mp3"), []byte("test"), 0644); err != nil {
+					return err
+				}
+				return os.WriteFile(filepath.Join(dir, "playlist.m3u"), []byte("test"), 0644)
+			},
+			wantViolLen: 0,
+		},
+		{
+			name: "Directory with .m3u8 playlist",
+			meta: &metadata.Metadata{
+				OriginalPath: "",
+				Tracks: []metadata.Track{
+					{Container: "MP3"},
+				},
+			},
+			setup: func(dir string) error {
+				if err := os.WriteFile(filepath.Join(dir, "01.mp3"), []byte("test"), 0644); err != nil {
+					return err
+				}
+				return os.WriteFile(filepath.Join(dir, "playlist.m3u8"), []byte("test"), 0644)
 			},
 			wantViolLen: 0,
 		},

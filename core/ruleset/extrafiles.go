@@ -5,21 +5,18 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/znth-cx/zentag/core/metadata"
 )
 
-var ignoredExtensions = map[string]bool{
-	".txt":  true,
-	".nfo":  true,
-	".log":  true,
-	".m3u":  true,
-	".m3u8": true,
-}
-
-var sessionFiles = map[string]bool{
-	"session.json": true,
+var ignoredPatterns = []*regexp.Regexp{
+	regexp.MustCompile(`(?i)^metadata\.json$`),
+	regexp.MustCompile(`\.txt$`),
+	regexp.MustCompile(`\.nfo$`),
+	regexp.MustCompile(`\.log$`),
+	regexp.MustCompile(`\.m3u8?$`),
 }
 
 func CheckExtraFiles(ctx context.Context, meta *metadata.Metadata) []Violation {
@@ -67,20 +64,24 @@ func CheckExtraFiles(ctx context.Context, meta *metadata.Metadata) []Violation {
 		}
 
 		name := entry.Name()
-		ext := strings.ToLower(filepath.Ext(name))
-		baseName := strings.ToLower(strings.TrimSuffix(name, ext))
 
 		if strings.HasPrefix(name, ".") {
 			continue
 		}
 
-		if sessionFiles[baseName] || sessionFiles[strings.ToLower(name)] {
+		shouldIgnore := false
+		for _, pattern := range ignoredPatterns {
+			if pattern.MatchString(name) {
+				shouldIgnore = true
+				break
+			}
+		}
+		if shouldIgnore {
 			continue
 		}
 
-		if ignoredExtensions[ext] {
-			continue
-		}
+		ext := strings.ToLower(filepath.Ext(name))
+		baseName := strings.ToLower(strings.TrimSuffix(name, ext))
 
 		if container == "MP3" || container == "FLAC" {
 			if baseName == "cover" && ext == ".jpg" {
