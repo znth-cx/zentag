@@ -39,6 +39,7 @@ These rules define the standards for audiobook uploads, covering naming conventi
 **Edition:**
 - Omitted if the base edition
 - Use your best judgement to determine if this release is special from the "base edition":
+- Non-exhaustive list of examples below.
   - Abridged
   - Full-Cast
   - GraphicAudio
