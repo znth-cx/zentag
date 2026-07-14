@@ -132,20 +132,22 @@ func TestBuildID3Tags_MultiValueFields(t *testing.T) {
 
 	got := buildID3Tags(m, track)
 
-	if len(got["ARTIST"]) != 2 {
-		t.Errorf("ARTIST length = %d, want 2", len(got["ARTIST"]))
+	// Multi-value fields are joined into a single ';'-separated string via
+	// metadata.JoinTags (one map element), not separate per-value entries.
+	if got["ARTIST"][0] != "Author One;Author Two" {
+		t.Errorf("ARTIST = %v, want \"Author One;Author Two\"", got["ARTIST"])
 	}
 
-	if len(got["COMPOSER"]) != 2 {
-		t.Errorf("COMPOSER length = %d, want 2", len(got["COMPOSER"]))
+	if got["COMPOSER"][0] != "Narrator One;Narrator Two" {
+		t.Errorf("COMPOSER = %v, want \"Narrator One;Narrator Two\"", got["COMPOSER"])
 	}
 
-	if len(got["GENRE"]) != 2 {
-		t.Errorf("GENRE length = %d, want 2", len(got["GENRE"]))
+	if got["GENRE"][0] != "Fantasy;Adventure" {
+		t.Errorf("GENRE = %v, want \"Fantasy;Adventure\"", got["GENRE"])
 	}
 
-	if len(got["LABEL"]) != 2 {
-		t.Errorf("LABEL length = %d, want 2", len(got["LABEL"]))
+	if got["LABEL"][0] != "Publisher One;Publisher Two" {
+		t.Errorf("LABEL = %v, want \"Publisher One;Publisher Two\"", got["LABEL"])
 	}
 }
 
@@ -161,12 +163,14 @@ func TestBuildID3Tags_MultipleSeriesEntries(t *testing.T) {
 
 	got := buildID3Tags(m, track)
 
-	if len(got["SERIES"]) != 2 {
-		t.Errorf("SERIES length = %d, want 2", len(got["SERIES"]))
+	// Series names and parts are each joined into a single ';'-separated
+	// string via metadata.JoinTags.
+	if got["SERIES"][0] != "Series One;Series Two" {
+		t.Errorf("SERIES = %v, want \"Series One;Series Two\"", got["SERIES"])
 	}
 
-	if len(got["SERIES-PART"]) != 2 {
-		t.Errorf("SERIES-PART length = %d, want 2", len(got["SERIES-PART"]))
+	if got["SERIES-PART"][0] != "1;3" {
+		t.Errorf("SERIES-PART = %v, want \"1;3\"", got["SERIES-PART"])
 	}
 }
 
