@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log/slog"
 	"path/filepath"
+	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/znth-cx/zentag/core/metadata"
@@ -54,7 +56,10 @@ func CheckNaming(ctx context.Context, meta *metadata.Metadata) []Violation {
 			Severity: SeverityTrumpable,
 			Message:  fmt.Sprintf("directory name does not match expected %q", expectedDir),
 		})
+		return violations
 	}
+
+	violations = append(violations, validateSourceToken(ctx, meta)...)
 
 	baseName := func(p string) string { return strings.TrimSuffix(filepath.Base(p), filepath.Ext(p)) }
 
@@ -70,6 +75,8 @@ func CheckNaming(ctx context.Context, meta *metadata.Metadata) []Violation {
 		return violations
 	}
 
+	violations = append(violations, validatePartNumberFormat(meta)...)
+
 	for i, tr := range meta.Tracks {
 		expectedTrack, err := naming.TrackName(ctx, meta, i)
 		if err != nil {
@@ -82,6 +89,65 @@ func CheckNaming(ctx context.Context, meta *metadata.Metadata) []Violation {
 				Rule:     "naming",
 				Severity: SeverityTrumpable,
 				Message:  fmt.Sprintf("track %s name does not match expected %q", tr.Path, expectedTrack),
+			})
+		}
+	}
+
+	return violations
+}
+
+// validateSourceToken validates the [Source] token in naming convention per RULES.md §3.
+func validateSourceToken(ctx context.Context, meta *metadata.Metadata) []Violation {
+	if meta.Source == "" {
+		return nil
+	}
+
+	expectedSource := fmt.Sprintf("[%s]", meta.Source)
+	actualDir := filepath.Base(meta.OriginalPath)
+
+	if !strings.Contains(actualDir, expectedSource) {
+		return []Violation{{
+			Rule:     "naming",
+			Severity: SeverityTrumpable,
+			Message:  fmt.Sprintf("directory name missing source token %q", expectedSource),
+		}}
+	}
+
+	return nil
+}
+
+// validatePartNumberFormat validates PartNumber padding per RULES.md §3.
+func validatePartNumberFormat(meta *metadata.Metadata) []Violation {
+	if len(meta.Tracks) <= 1 {
+		return nil
+	}
+
+	maxPart := 0
+	for _, tr := range meta.Tracks {
+		if tr.PartNumber > maxPart {
+			maxPart = tr.PartNumber
+		}
+	}
+
+	expectedWidth := len(strconv.Itoa(maxPart))
+
+	var violations []Violation
+	for _, tr := range meta.Tracks {
+		baseName := filepath.Base(tr.Path)
+		ext := filepath.Ext(baseName)
+		nameWithoutExt := strings.TrimSuffix(baseName, ext)
+
+		re := regexp.MustCompile(`^(\d+)\.`)
+		matches := re.FindStringSubmatch(nameWithoutExt)
+		if len(matches) < 2 {
+			continue
+		}
+
+		if len(matches[1]) != expectedWidth {
+			violations = append(violations, Violation{
+				Rule:     "naming",
+				Severity: SeverityTrumpable,
+				Message:  fmt.Sprintf("track %s has part number width %d, expected %d based on max part %d", tr.Path, len(matches[1]), expectedWidth, maxPart),
 			})
 		}
 	}
