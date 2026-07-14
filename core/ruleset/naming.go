@@ -52,12 +52,26 @@ func CheckNaming(ctx context.Context, meta *metadata.Metadata) []Violation {
 	}
 
 	actualDir := filepath.Base(meta.OriginalPath)
+	// effectiveDir is the directory name tracks are expected to match. When the
+	// on-disk name carries an edition the metadata doesn't (common for check,
+	// where Edition is rarely tagged), accept it instead of false-flagging.
+	effectiveDir := expectedDir
 	if actualDir != expectedDir {
-		violations = append(violations, Violation{
-			Rule:     "naming",
-			Severity: SeverityTrumpable,
-			Message:  fmt.Sprintf("directory name does not match expected %q", expectedDir),
-		})
+		accepted := false
+		if meta.Edition == "" {
+			if ed, ok := naming.DetectEdition(ctx, meta, actualDir); ok {
+				slog.DebugContext(ctx, "ruleset: directory carries edition absent from metadata, accepting", "path", meta.OriginalPath, "edition", ed)
+				effectiveDir = actualDir
+				accepted = true
+			}
+		}
+		if !accepted {
+			violations = append(violations, Violation{
+				Rule:     "naming",
+				Severity: SeverityTrumpable,
+				Message:  fmt.Sprintf("directory name does not match expected %q", expectedDir),
+			})
+		}
 	}
 
 	violations = append(violations, validateSourceToken(ctx, meta)...)
@@ -66,7 +80,7 @@ func CheckNaming(ctx context.Context, meta *metadata.Metadata) []Violation {
 
 	if len(meta.Tracks) == 1 {
 		actualTrack := baseName(meta.Tracks[0].Path)
-		if actualTrack != expectedDir {
+		if actualTrack != effectiveDir {
 			violations = append(violations, Violation{
 				Rule:     "naming",
 				Severity: SeverityTrumpable,

@@ -234,3 +234,36 @@ func TestCheckNaming_SingleFileSkipsPartNumberValidation(t *testing.T) {
 	violations := CheckNaming(context.Background(), meta)
 	assert.NotEmpty(t, violations)
 }
+
+// TestCheckNaming_DirectoryEditionAbsentFromMetadata: the on-disk directory
+// carries an edition ("Love Lane") the metadata does not (Edition is rarely
+// tagged, so check usually has it empty). The directory must still be accepted
+// rather than false-flagged as a naming violation. Mirrors the real-world case
+// from a zentag check run on a multi-file MP3 release.
+func TestCheckNaming_DirectoryEditionAbsentFromMetadata(t *testing.T) {
+	meta := namingBaseMeta()
+	// build the edition-bearing directory name by hand: meta.Edition stays ""
+	edDir := "Brandon Sanderson - The Way of Kings (2010) ENG Love Lane {Michael Kramer} [WEB] M4B AAC 64kbps"
+	meta.OriginalPath = filepath.Join("/books", edDir)
+	meta.Tracks[0].Path = filepath.Join(meta.OriginalPath, edDir+".m4b")
+
+	for _, v := range CheckNaming(context.Background(), meta) {
+		assert.NotContains(t, v.Message, "directory name does not match")
+	}
+}
+
+// TestCheckNaming_DirectoryEditionStillFlagsRealMismatch: edition tolerance
+// must not mask an actual naming error — a wrong narrator is still flagged.
+func TestCheckNaming_DirectoryEditionStillFlagsRealMismatch(t *testing.T) {
+	meta := namingBaseMeta()
+	edDir := "Brandon Sanderson - The Way of Kings (2010) ENG Love Lane {Wrong Narrator} [WEB] M4B AAC 64kbps"
+	meta.OriginalPath = filepath.Join("/books", edDir)
+
+	hasDirViolation := false
+	for _, v := range CheckNaming(context.Background(), meta) {
+		if strings.Contains(v.Message, "directory name does not match") {
+			hasDirViolation = true
+		}
+	}
+	assert.True(t, hasDirViolation, "real mismatch must still be flagged")
+}
