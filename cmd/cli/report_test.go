@@ -108,6 +108,66 @@ func TestFormatCheckReport_AllPassed(t *testing.T) {
 	assert.NotContains(t, got, "✗")
 }
 
+// TestFormatCheckReport_StrayRuleKeyStillRenders: a rule key not in
+// checkRuleOrder (e.g. a new check added without updating the list) must
+// still appear in output. Regression for the silent-drop bug where check
+// printed "violations found" but showed nothing.
+func TestFormatCheckReport_StrayRuleKeyStillRenders(t *testing.T) {
+	violations := []ruleset.Violation{
+		{Rule: "some_future_rule", Severity: ruleset.SeverityTrumpable, Message: "future check failed"},
+	}
+	got := formatCheckReport(violations)
+	assert.Contains(t, got, "✗ some_future_rule")
+	assert.Contains(t, got, "future check failed")
+}
+
+// TestFormatCheckReport_StrayWarnOnlyRendersTriangle: stray rules with only
+// SeverityWarn render as advisory (⚠), not hard failure (✗).
+func TestFormatCheckReport_StrayWarnOnlyRendersTriangle(t *testing.T) {
+	violations := []ruleset.Violation{
+		{Rule: "future_advisory", Severity: ruleset.SeverityWarn, Message: "advisory"},
+	}
+	got := formatCheckReport(violations)
+	assert.Contains(t, got, "⚠ future_advisory")
+	assert.NotContains(t, got, "✗ future_advisory")
+}
+
+// TestCheckRuleOrderMatchesRulesetKeys guards future drift: every Rule key
+// the ruleset actually emits must be in checkRuleOrder so the canonical
+// display order applies. If this fails, add the missing key to checkRuleOrder
+// in report.go (and keep it in Validate call order).
+func TestCheckRuleOrderMatchesRulesetKeys(t *testing.T) {
+	// Derived from every Rule: "..." literal in core/ruleset/*.go. A new
+	// check that adds a Rule literal must also add it here.
+	emitted := map[string]struct{}{
+		"primary_keys":           {},
+		"required_tags":          {},
+		"language":               {},
+		"cover":                  {},
+		"cover_placement":        {},
+		"chapters":               {},
+		"audnexus_chapters":      {},
+		"banned_content":         {},
+		"naming":                 {},
+		"source":                 {},
+		"format_specific_tags":   {},
+		"m4b_split_file":         {},
+		"extra_files":            {},
+		"bitrate":                {},
+		"lossy_container":        {},
+		"flac_md5":               {},
+		"tag_separator_format":   {},
+	}
+	listed := make(map[string]struct{}, len(checkRuleOrder))
+	for _, r := range checkRuleOrder {
+		listed[r] = struct{}{}
+	}
+	for k := range emitted {
+		_, ok := listed[k]
+		assert.True(t, ok, "rule %q emitted by ruleset but missing from checkRuleOrder in report.go", k)
+	}
+}
+
 func TestFormatReport_JSONRoundTrips(t *testing.T) {
 	violations := []ruleset.Violation{
 		{Rule: "primary_keys", Severity: ruleset.SeverityTrumpable, Message: "no ISBN or ASIN"},

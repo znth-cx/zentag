@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
@@ -18,16 +19,27 @@ var severityOrder = []ruleset.Severity{
 }
 
 // checkRuleOrder: rule areas ruleset.Validate checks, in check order;
-// drives one pass/fail line per area in `zentag check` output.
+// drives one pass/fail line per area in `zentag check` output. Must cover
+// every Rule key the ruleset emits, or formatCheckReport's fallback renders
+// the strays (and a future drift still shows rather than silently dropping).
 var checkRuleOrder = []string{
 	"primary_keys",
 	"required_tags",
 	"language",
 	"cover",
+	"cover_placement",
 	"chapters",
 	"audnexus_chapters",
 	"banned_content",
 	"naming",
+	"source",
+	"format_specific_tags",
+	"m4b_split_file",
+	"extra_files",
+	"bitrate",
+	"lossy_container",
+	"flac_md5",
+	"tag_separator_format",
 }
 
 var (
@@ -58,12 +70,39 @@ func formatCheckReport(violations []ruleset.Violation) string {
 	}
 
 	var passed, failed []string
+	seen := make(map[string]struct{}, len(checkRuleOrder))
 	for _, rule := range checkRuleOrder {
+		seen[rule] = struct{}{}
 		group, failing := byRule[rule]
 		if !failing {
 			passed = append(passed, checkPassStyle.Render("✓")+" "+rule)
 			continue
 		}
+		symbol := checkFailStyle.Render("✗")
+		if allWarn(group) {
+			symbol = checkWarnStyle.Render("⚠")
+		}
+		var b strings.Builder
+		fmt.Fprintf(&b, "%s %s", symbol, rule)
+		for _, v := range group {
+			fmt.Fprintf(&b, "\n  %s", checkMsgStyle.Render(fmt.Sprintf("[%s] %s", v.Severity, v.Message)))
+		}
+		failed = append(failed, b.String())
+	}
+
+	// Fallback: any rule key the ruleset emits that isn't in checkRuleOrder
+	// (e.g. a new check added without updating the list above). Rendered last
+	// so a future drift surfaces visibly instead of printing "violations
+	// found" with no explanation.
+	var strayRules []string
+	for rule := range byRule {
+		if _, ok := seen[rule]; !ok {
+			strayRules = append(strayRules, rule)
+		}
+	}
+	sort.Strings(strayRules)
+	for _, rule := range strayRules {
+		group := byRule[rule]
 		symbol := checkFailStyle.Render("✗")
 		if allWarn(group) {
 			symbol = checkWarnStyle.Render("⚠")
