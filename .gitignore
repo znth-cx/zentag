@@ -9,6 +9,8 @@ cover.html
 *.m4a
 *.mp3
 *.flac
+# but keep committed test fixtures
+!core/mp3tag/testdata/*.mp3
 .vscode/
 .idea/
 Thumbs.db
