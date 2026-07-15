@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -77,27 +78,15 @@ func mediainfoJSON(title, extra string, bitrateKbps int) string {
 func mediainfoJSONWithFormat(title, extra string, bitrateKbps int, format, profile string) string {
 	return `{"media":{"track":[
 		{"@type":"General","Title":"` + title + `","Genre":"Fantasy","extra":` + extra + `},
-		{"@type":"Audio","Format":"` + format + `","Format_Profile":"` + profile + `","BitRate":"` + itoa(bitrateKbps*1000) + `"}
+		{"@type":"Audio","Format":"` + format + `","Format_Profile":"` + profile + `","BitRate":"` + strconv.Itoa(bitrateKbps*1000) + `"}
 	]}}`
 }
 
 func mediainfoJSONWithLanguage(title, extra string, bitrateKbps int, format, profile, audioLanguage string) string {
 	return `{"media":{"track":[
 		{"@type":"General","Title":"` + title + `","Genre":"Fantasy","extra":` + extra + `},
-		{"@type":"Audio","Format":"` + format + `","Format_Profile":"` + profile + `","BitRate":"` + itoa(bitrateKbps*1000) + `","Language":"` + audioLanguage + `"}
+		{"@type":"Audio","Format":"` + format + `","Format_Profile":"` + profile + `","BitRate":"` + strconv.Itoa(bitrateKbps*1000) + `","Language":"` + audioLanguage + `"}
 	]}}`
-}
-
-func itoa(n int) string {
-	if n == 0 {
-		return "0"
-	}
-	digits := ""
-	for n > 0 {
-		digits = string(rune('0'+n%10)) + digits
-		n /= 10
-	}
-	return digits
 }
 
 func TestGather_SingleFileHappyPath(t *testing.T) {
