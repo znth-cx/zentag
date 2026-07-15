@@ -36,6 +36,34 @@ func TestNormalizeAudioFormat(t *testing.T) {
 			wantContainer: "",
 			wantCodec:     "FLAC",
 		},
+		{
+			name:          "m4b dolby digital",
+			path:          "book.m4b",
+			info:          TechnicalInfo{Codec: "AC-3"},
+			wantContainer: "M4B",
+			wantCodec:     "DD",
+		},
+		{
+			name:          "m4b dolby digital plus",
+			path:          "book.m4b",
+			info:          TechnicalInfo{Codec: "E-AC-3"},
+			wantContainer: "M4B",
+			wantCodec:     "DDP",
+		},
+		{
+			name:          "m4b atmos folds into ddp",
+			path:          "book.m4b",
+			info:          TechnicalInfo{Codec: "E-AC-3 JOC"},
+			wantContainer: "M4B",
+			wantCodec:     "DDP",
+		},
+		{
+			name:          "m4b truehd",
+			path:          "book.m4b",
+			info:          TechnicalInfo{Codec: "MLP FBA"},
+			wantContainer: "M4B",
+			wantCodec:     "TrueHD",
+		},
 	}
 
 	for _, tc := range cases {
@@ -50,10 +78,10 @@ func TestNormalizeAudioFormat(t *testing.T) {
 
 func TestNormalizeAudioFormat_UnknownFormatErrors(t *testing.T) {
 	_, _, err := NormalizeAudioFormat("book.wav", TechnicalInfo{Codec: "PCM"})
-	assert.ErrorIs(t, err, ErrUnknownAudioFormat)
+	assert.ErrorIs(t, err, ErrUnsupportedAudioFormat)
 }
 
 func TestNormalizeAudioFormat_AACWithoutM4BExtensionErrors(t *testing.T) {
 	_, _, err := NormalizeAudioFormat("book.mp4", TechnicalInfo{Codec: "AAC"})
-	assert.ErrorIs(t, err, ErrUnknownAudioFormat)
+	assert.ErrorIs(t, err, ErrUnsupportedAudioFormat)
 }
