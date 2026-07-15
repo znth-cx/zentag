@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/znth-cx/zentag/core/metadata"
 )
 
@@ -184,4 +185,38 @@ func TestTrackName_MultiFile_InconsistentTracksErrors(t *testing.T) {
 	meta.Tracks[1].Codec = "FLAC"
 	_, err := TrackName(context.Background(), meta, 0)
 	assert.ErrorContains(t, err, "inconsistent")
+}
+
+func TestDetectEdition_EditionPresent(t *testing.T) {
+	meta := baseMeta() // "...ENG {Michael Kramer} [WEB] M4B AAC 64kbps"
+	actual := "Brandon Sanderson - The Way of Kings (2010) ENG Love Lane {Michael Kramer} [WEB] M4B AAC 64kbps"
+	ed, ok := DetectEdition(context.Background(), meta, actual)
+	assert.True(t, ok)
+	assert.Equal(t, "Love Lane", ed)
+}
+
+func TestDetectEdition_NoEditionReturnsFalse(t *testing.T) {
+	meta := baseMeta()
+	dir, err := DirectoryName(context.Background(), meta)
+	require.NoError(t, err)
+	_, ok := DetectEdition(context.Background(), meta, dir)
+	assert.False(t, ok)
+}
+
+func TestDetectEdition_MismatchedSuffixReturnsFalse(t *testing.T) {
+	meta := baseMeta()
+	// wrong narrator in suffix -> not an edition variant, a real mismatch
+	actual := "Brandon Sanderson - The Way of Kings (2010) ENG Love Lane {Someone Else} [WEB] M4B AAC 64kbps"
+	_, ok := DetectEdition(context.Background(), meta, actual)
+	assert.False(t, ok)
+}
+
+func TestDetectEdition_MP3ContainerOmitted(t *testing.T) {
+	meta := baseMeta()
+	meta.Tracks[0].Container = ""
+	meta.Tracks[0].Codec = "MP3"
+	actual := "Brandon Sanderson - The Way of Kings (2010) ENG Abridged {Michael Kramer} [WEB] MP3 64kbps"
+	ed, ok := DetectEdition(context.Background(), meta, actual)
+	assert.True(t, ok)
+	assert.Equal(t, "Abridged", ed)
 }

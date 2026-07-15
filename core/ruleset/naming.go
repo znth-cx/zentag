@@ -5,11 +5,15 @@ import (
 	"fmt"
 	"log/slog"
 	"path/filepath"
+	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/znth-cx/zentag/core/metadata"
 	"github.com/znth-cx/zentag/core/naming"
 )
+
+var partNumberPattern = regexp.MustCompile(`^(\d+)\.`)
 
 // CheckNaming checks RULES.md §3: title must be APA title case, dir/track names must match naming.DirectoryName/naming.TrackName.
 // Returns nil if Author/Title/Narrator/Tracks empty: CheckRequiredTags/CheckPrimaryKeys already flags that gap.
@@ -48,19 +52,35 @@ func CheckNaming(ctx context.Context, meta *metadata.Metadata) []Violation {
 	}
 
 	actualDir := filepath.Base(meta.OriginalPath)
+	// effectiveDir is the directory name tracks are expected to match. When the
+	// on-disk name carries an edition the metadata doesn't (common for check,
+	// where Edition is rarely tagged), accept it instead of false-flagging.
+	effectiveDir := expectedDir
 	if actualDir != expectedDir {
-		violations = append(violations, Violation{
-			Rule:     "naming",
-			Severity: SeverityTrumpable,
-			Message:  fmt.Sprintf("directory name does not match expected %q", expectedDir),
-		})
+		accepted := false
+		if meta.Edition == "" {
+			if ed, ok := naming.DetectEdition(ctx, meta, actualDir); ok {
+				slog.DebugContext(ctx, "ruleset: directory carries edition absent from metadata, accepting", "path", meta.OriginalPath, "edition", ed)
+				effectiveDir = actualDir
+				accepted = true
+			}
+		}
+		if !accepted {
+			violations = append(violations, Violation{
+				Rule:     "naming",
+				Severity: SeverityTrumpable,
+				Message:  fmt.Sprintf("directory name does not match expected %q", expectedDir),
+			})
+		}
 	}
+
+	violations = append(violations, validateSourceToken(ctx, meta)...)
 
 	baseName := func(p string) string { return strings.TrimSuffix(filepath.Base(p), filepath.Ext(p)) }
 
 	if len(meta.Tracks) == 1 {
 		actualTrack := baseName(meta.Tracks[0].Path)
-		if actualTrack != expectedDir {
+		if actualTrack != effectiveDir {
 			violations = append(violations, Violation{
 				Rule:     "naming",
 				Severity: SeverityTrumpable,
@@ -69,6 +89,8 @@ func CheckNaming(ctx context.Context, meta *metadata.Metadata) []Violation {
 		}
 		return violations
 	}
+
+	violations = append(violations, validatePartNumberFormat(meta)...)
 
 	for i, tr := range meta.Tracks {
 		expectedTrack, err := naming.TrackName(ctx, meta, i)
@@ -82,6 +104,64 @@ func CheckNaming(ctx context.Context, meta *metadata.Metadata) []Violation {
 				Rule:     "naming",
 				Severity: SeverityTrumpable,
 				Message:  fmt.Sprintf("track %s name does not match expected %q", tr.Path, expectedTrack),
+			})
+		}
+	}
+
+	return violations
+}
+
+// validateSourceToken validates the [Source] token in naming convention per RULES.md §3.
+func validateSourceToken(ctx context.Context, meta *metadata.Metadata) []Violation {
+	if meta.Source == "" {
+		return nil
+	}
+
+	expectedSource := fmt.Sprintf("[%s]", meta.Source)
+	actualDir := filepath.Base(meta.OriginalPath)
+
+	if !strings.Contains(actualDir, expectedSource) {
+		return []Violation{{
+			Rule:     "naming",
+			Severity: SeverityTrumpable,
+			Message:  fmt.Sprintf("directory name missing source token %q", expectedSource),
+		}}
+	}
+
+	return nil
+}
+
+// validatePartNumberFormat validates PartNumber padding per RULES.md §3.
+func validatePartNumberFormat(meta *metadata.Metadata) []Violation {
+	if len(meta.Tracks) <= 1 {
+		return nil
+	}
+
+	maxPart := 0
+	for _, tr := range meta.Tracks {
+		if tr.PartNumber > maxPart {
+			maxPart = tr.PartNumber
+		}
+	}
+
+	expectedWidth := len(strconv.Itoa(maxPart))
+
+	var violations []Violation
+	for _, tr := range meta.Tracks {
+		baseName := filepath.Base(tr.Path)
+		ext := filepath.Ext(baseName)
+		nameWithoutExt := strings.TrimSuffix(baseName, ext)
+
+		matches := partNumberPattern.FindStringSubmatch(nameWithoutExt)
+		if len(matches) < 2 {
+			continue
+		}
+
+		if len(matches[1]) != expectedWidth {
+			violations = append(violations, Violation{
+				Rule:     "naming",
+				Severity: SeverityTrumpable,
+				Message:  fmt.Sprintf("track %s has part number width %d, expected %d based on max part %d", tr.Path, len(matches[1]), expectedWidth, maxPart),
 			})
 		}
 	}

@@ -52,7 +52,7 @@ var checkCmd = &cobra.Command{
 			}
 		}
 
-		violations := ruleset.Validate(ctx, meta)
+		violations := ruleset.ValidateWithMediaInfo(ctx, meta, mi)
 
 		var report string
 		if jsonOutput {

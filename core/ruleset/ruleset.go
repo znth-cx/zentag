@@ -5,6 +5,7 @@ import (
 	"context"
 	"log/slog"
 
+	"github.com/znth-cx/zentag/core/mediainfo"
 	"github.com/znth-cx/zentag/core/metadata"
 )
 
@@ -35,11 +36,28 @@ func Validate(ctx context.Context, meta *metadata.Metadata) []Violation {
 	violations = append(violations, CheckRequiredTags(meta)...)
 	violations = append(violations, CheckLanguage(meta)...)
 	violations = append(violations, CheckCover(ctx, meta)...)
+	violations = append(violations, CheckCoverPlacement(ctx, meta)...)
 	violations = append(violations, CheckChapters(meta)...)
 	violations = append(violations, CheckAudnexusChapters(meta)...)
 	violations = append(violations, CheckBannedContent(meta)...)
 	violations = append(violations, CheckNaming(ctx, meta)...)
+	violations = append(violations, CheckSource(meta)...)
+	violations = append(violations, CheckFormatSpecificTags(meta)...)
+	violations = append(violations, CheckM4BSingleFile(meta)...)
+	violations = append(violations, CheckExtraFiles(ctx, meta)...)
+	violations = append(violations, CheckBitrate(meta)...)
+	violations = append(violations, CheckLossyContainer(meta)...)
+	violations = append(violations, CheckMixedFormat(meta)...)
+	violations = append(violations, CheckTagSeparators(meta)...)
 
 	slog.DebugContext(ctx, "ruleset: validation complete", "path", meta.OriginalPath, "violations", len(violations))
+	return violations
+}
+
+// ValidateWithMediaInfo runs Validate plus CheckFLACMD5 (needs a mediainfo probe).
+// Delegates to Validate so the check list can't drift between the two.
+func ValidateWithMediaInfo(ctx context.Context, meta *metadata.Metadata, mi *mediainfo.Wrapper) []Violation {
+	violations := Validate(ctx, meta)
+	violations = append(violations, CheckFLACMD5(ctx, meta, mi)...)
 	return violations
 }
