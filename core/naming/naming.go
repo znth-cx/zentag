@@ -41,37 +41,84 @@ func languageToken(language string) string {
 	return strings.ToUpper(language)
 }
 
-// baseName builds shared prefix per RULES.md §3: "Author - Title (Year) Language Edition {Narrator} [Source] Container Codec Bitrate".
-func baseName(meta *metadata.Metadata) (string, error) {
+// directorySegments builds the text before and after the optional edition
+// slot in a directory/track name, per RULES.md §3:
+//
+//	prefix = "Author - Title (Year) Language"
+//	suffix = "{Narrator} [Source] Container Codec Bitrate"
+//
+// Edition, when present, is joined between the two (see baseName). Both
+// segments share baseName's validation so callers that only need one stay
+// consistent with DirectoryName.
+func directorySegments(meta *metadata.Metadata) (prefix, suffix string, err error) {
 	if len(meta.Author) == 0 || meta.Author[0] == "" {
-		return "", errors.New("naming: metadata has no primary author")
+		return "", "", errors.New("naming: metadata has no primary author")
 	}
 	if meta.Title == "" {
-		return "", errors.New("naming: metadata has no title")
+		return "", "", errors.New("naming: metadata has no title")
 	}
 	if len(meta.Narrator) == 0 || meta.Narrator[0] == "" {
-		return "", errors.New("naming: metadata has no primary narrator")
+		return "", "", errors.New("naming: metadata has no primary narrator")
 	}
 	if err := checkTracks(meta); err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	track := meta.Tracks[0]
 	title := TitleCase(meta.Title, meta.Language)
 
-	parts := []string{
-		fmt.Sprintf("%s - %s (%d) %s", meta.Author[0], title, meta.Year, languageToken(meta.Language)),
+	prefix = fmt.Sprintf("%s - %s (%d) %s", meta.Author[0], title, meta.Year, languageToken(meta.Language))
+
+	rest := []string{fmt.Sprintf("{%s} [%s]", meta.Narrator[0], meta.Source)}
+	if track.Container != "" {
+		rest = append(rest, track.Container)
 	}
+	rest = append(rest, fmt.Sprintf("%s %dkbps", track.Codec, track.Bitrate))
+	suffix = strings.Join(rest, " ")
+	return prefix, suffix, nil
+}
+
+// baseName builds shared prefix per RULES.md §3: "Author - Title (Year) Language Edition {Narrator} [Source] Container Codec Bitrate".
+func baseName(meta *metadata.Metadata) (string, error) {
+	prefix, suffix, err := directorySegments(meta)
+	if err != nil {
+		return "", err
+	}
+	parts := []string{prefix}
 	if meta.Edition != "" {
 		parts = append(parts, meta.Edition)
 	}
-	parts = append(parts, fmt.Sprintf("{%s} [%s]", meta.Narrator[0], meta.Source))
-	if track.Container != "" {
-		parts = append(parts, track.Container)
-	}
-	parts = append(parts, fmt.Sprintf("%s %dkbps", track.Codec, track.Bitrate))
-
+	parts = append(parts, suffix)
 	return strings.Join(parts, " "), nil
+}
+
+// DetectEdition checks whether actualDir is the directory name DirectoryName
+// would produce for meta but with an extra edition token inserted between the
+// language and the narrator — the case where the on-disk name carries an
+// edition (e.g. "Love Lane", "Abridged") that the metadata does not. It
+// returns the detected edition and true when the prefix and suffix match
+// exactly; "" and false otherwise. Call only when meta.Edition is unset.
+func DetectEdition(ctx context.Context, meta *metadata.Metadata, actualDir string) (string, bool) {
+	prefix, suffix, err := directorySegments(meta)
+	if err != nil {
+		return "", false
+	}
+	prefix = sanitize(ctx, prefix)
+	suffix = sanitize(ctx, suffix)
+
+	pre := prefix + " "
+	post := " " + suffix
+	if !strings.HasPrefix(actualDir, pre) || !strings.HasSuffix(actualDir, post) {
+		return "", false
+	}
+	if len(actualDir) < len(pre)+len(post) {
+		return "", false
+	}
+	edition := strings.TrimSpace(actualDir[len(pre) : len(actualDir)-len(post)])
+	if edition == "" {
+		return "", false
+	}
+	return edition, true
 }
 
 // DirectoryName builds RULES.md §3's directory name for meta.

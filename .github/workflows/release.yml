@@ -28,6 +28,15 @@ jobs:
         with:
           go-version-file: go.mod
 
+      # Pull the dependencies + install sections from README
+      - name: Build install notes from README
+        run: |
+          {
+            echo 'RELEASE_NOTES<<GORELEASER_EOF'
+            awk '/^## Required dependencies/{f=1} /^## Commands/{f=0} f' README.md
+            echo 'GORELEASER_EOF'
+          } >> "$GITHUB_ENV"
+
       - uses: goreleaser/goreleaser-action@v7
         with:
           distribution: goreleaser

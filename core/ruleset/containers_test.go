@@ -1,0 +1,259 @@
+package ruleset
+
+import (
+	"testing"
+
+	"github.com/znth-cx/zentag/core/metadata"
+)
+
+func TestCheckLossyContainer(t *testing.T) {
+	tests := []struct {
+		name        string
+		tracks      []metadata.Track
+		wantViolLen int
+		wantMsg     string
+	}{
+		{
+			name: "M4B with AAC codec",
+			tracks: []metadata.Track{
+				{Path: "test.m4b", Container: "M4B", Codec: "AAC"},
+			},
+			wantViolLen: 0,
+		},
+		{
+			name: "m4b with aac codec (lowercase)",
+			tracks: []metadata.Track{
+				{Path: "test.m4b", Container: "m4b", Codec: "aac"},
+			},
+			wantViolLen: 0,
+		},
+		{
+			name: "M4B with aac codec (mixed case)",
+			tracks: []metadata.Track{
+				{Path: "test.m4b", Container: "M4b", Codec: "Aac"},
+			},
+			wantViolLen: 0,
+		},
+		{
+			name: "MP3 container",
+			tracks: []metadata.Track{
+				{Path: "test.mp3", Container: "MP3", Codec: "MP3"},
+			},
+			wantViolLen: 1,
+			wantMsg:     "container \"MP3\" with codec \"MP3\" should be M4B",
+		},
+		{
+			name: "M4A with AAC codec",
+			tracks: []metadata.Track{
+				{Path: "test.m4a", Container: "M4A", Codec: "AAC"},
+			},
+			wantViolLen: 1,
+			wantMsg:     "container \"M4A\" with codec \"AAC\" should be M4B",
+		},
+		{
+			name: "FLAC container",
+			tracks: []metadata.Track{
+				{Path: "test.flac", Container: "FLAC", Codec: "FLAC"},
+			},
+			wantViolLen: 0,
+		},
+		{
+			name: "M4B with OPUS codec",
+			tracks: []metadata.Track{
+				{Path: "test.m4b", Container: "M4B", Codec: "OPUS"},
+			},
+			wantViolLen: 0,
+		},
+		{
+			name: "MP3 with OPUS codec",
+			tracks: []metadata.Track{
+				{Path: "test.mp3", Container: "MP3", Codec: "OPUS"},
+			},
+			wantViolLen: 1,
+			wantMsg:     "container \"MP3\" with codec \"OPUS\" should be M4B",
+		},
+		{
+			name: "Multi-file with mixed containers",
+			tracks: []metadata.Track{
+				{Path: "part1.m4b", Container: "M4B", Codec: "AAC"},
+				{Path: "part2.mp3", Container: "MP3", Codec: "MP3"},
+				{Path: "part3.m4b", Container: "M4B", Codec: "AAC"},
+			},
+			wantViolLen: 1,
+		},
+		{
+			name: "Multi-file with multiple invalid containers",
+			tracks: []metadata.Track{
+				{Path: "part1.mp3", Container: "MP3", Codec: "MP3"},
+				{Path: "part2.m4a", Container: "M4A", Codec: "AAC"},
+			},
+			wantViolLen: 2,
+		},
+		{
+			name: "Multi-file same invalid combo deduped to one",
+			tracks: []metadata.Track{
+				{Path: "part1.mp3", Container: "MP3", Codec: "MP3"},
+				{Path: "part2.mp3", Container: "MP3", Codec: "MP3"},
+				{Path: "part3.mp3", Container: "MP3", Codec: "MP3"},
+			},
+			wantViolLen: 1,
+			wantMsg:     "container \"MP3\" with codec \"MP3\" should be M4B",
+		},
+		{
+			name: "ALAC codec (lossless)",
+			tracks: []metadata.Track{
+				{Path: "test.m4a", Container: "M4A", Codec: "ALAC"},
+			},
+			wantViolLen: 0,
+		},
+		{
+			name: "Empty container and codec",
+			tracks: []metadata.Track{
+				{Path: "test.unknown", Container: "", Codec: ""},
+			},
+			wantViolLen: 0,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			meta := &metadata.Metadata{
+				Tracks: tt.tracks,
+			}
+			violations := CheckLossyContainer(meta)
+
+			if len(violations) != tt.wantViolLen {
+				t.Errorf("CheckLossyContainer() violations count = %v, want %v", len(violations), tt.wantViolLen)
+			}
+
+			if tt.wantViolLen > 0 && violations[0].Message == "" {
+				t.Errorf("CheckLossyContainer() expected violation message, got empty")
+			}
+
+			if tt.wantMsg != "" && len(violations) > 0 {
+				if violations[0].Message != tt.wantMsg && !contains(violations[0].Message, tt.wantMsg) {
+					t.Errorf("CheckLossyContainer() message = %v, want to contain %v", violations[0].Message, tt.wantMsg)
+				}
+			}
+
+			for _, v := range violations {
+				if v.Rule != "lossy_container" {
+					t.Errorf("CheckLossyContainer() expected rule 'lossy_container', got %v", v.Rule)
+				}
+				if v.Severity != SeverityUpgradable {
+					t.Errorf("CheckLossyContainer() expected severity 'upgradable', got %v", v.Severity)
+				}
+			}
+		})
+	}
+}
+
+func TestCheckLossyContainerNil(t *testing.T) {
+	violations := CheckLossyContainer(nil)
+	if violations != nil {
+		t.Errorf("CheckLossyContainer() on nil metadata should return nil, got %v", violations)
+	}
+}
+
+func TestCheckLossyContainerNilTracks(t *testing.T) {
+	meta := &metadata.Metadata{
+		Tracks: nil,
+	}
+	violations := CheckLossyContainer(meta)
+	if len(violations) != 0 {
+		t.Errorf("CheckLossyContainer() on nil tracks should return empty, got %v", violations)
+	}
+}
+
+func TestCheckLossyContainerEmptyTracks(t *testing.T) {
+	meta := &metadata.Metadata{
+		Tracks: []metadata.Track{},
+	}
+	violations := CheckLossyContainer(meta)
+	if len(violations) != 0 {
+		t.Errorf("CheckLossyContainer() on empty tracks should return empty, got %v", violations)
+	}
+}
+
+func TestCheckMixedFormat(t *testing.T) {
+	tests := []struct {
+		name        string
+		tracks      []metadata.Track
+		wantViolLen int
+		wantMsg     string
+	}{
+		{
+			name:        "Single track no violation",
+			tracks:      []metadata.Track{{Path: "a.m4b", Container: "M4B", Codec: "AAC"}},
+			wantViolLen: 0,
+		},
+		{
+			name: "All tracks same combo no violation",
+			tracks: []metadata.Track{
+				{Path: "p1.mp3", Container: "MP3", Codec: "MP3"},
+				{Path: "p2.mp3", Container: "MP3", Codec: "MP3"},
+				{Path: "p3.mp3", Container: "MP3", Codec: "MP3"},
+			},
+			wantViolLen: 0,
+		},
+		{
+			name: "Same combo different casing no violation",
+			tracks: []metadata.Track{
+				{Path: "p1.mp3", Container: "MP3", Codec: "MP3"},
+				{Path: "p2.MP3", Container: "mp3", Codec: "mp3"},
+			},
+			wantViolLen: 0,
+		},
+		{
+			name: "Mixed MP3 and FLAC prohibited",
+			tracks: []metadata.Track{
+				{Path: "p1.mp3", Container: "MP3", Codec: "MP3"},
+				{Path: "p2.flac", Container: "FLAC", Codec: "FLAC"},
+			},
+			wantViolLen: 1,
+			wantMsg:     `tracks have mixed formats: container "MP3" codec "MP3", container "FLAC" codec "FLAC"`,
+		},
+		{
+			name: "Three distinct combos all listed",
+			tracks: []metadata.Track{
+				{Path: "p1.m4b", Container: "M4B", Codec: "AAC"},
+				{Path: "p2.mp3", Container: "MP3", Codec: "MP3"},
+				{Path: "p3.flac", Container: "FLAC", Codec: "FLAC"},
+			},
+			wantViolLen: 1,
+			wantMsg:     `container "M4B" codec "AAC"`,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			meta := &metadata.Metadata{Tracks: tt.tracks}
+			violations := CheckMixedFormat(meta)
+
+			if len(violations) != tt.wantViolLen {
+				t.Fatalf("CheckMixedFormat() violations = %d, want %d (%v)", len(violations), tt.wantViolLen, violations)
+			}
+
+			if tt.wantViolLen == 0 {
+				return
+			}
+
+			v := violations[0]
+			if v.Rule != "mixed_format" {
+				t.Errorf("rule = %q, want mixed_format", v.Rule)
+			}
+			if v.Severity != SeverityProhibited {
+				t.Errorf("severity = %q, want prohibited", v.Severity)
+			}
+			if tt.wantMsg != "" && !contains(v.Message, tt.wantMsg) {
+				t.Errorf("message = %q, want to contain %q", v.Message, tt.wantMsg)
+			}
+		})
+	}
+}
+
+func TestCheckMixedFormatNil(t *testing.T) {
+	if violations := CheckMixedFormat(nil); violations != nil {
+		t.Errorf("CheckMixedFormat(nil) = %v, want nil", violations)
+	}
+}
