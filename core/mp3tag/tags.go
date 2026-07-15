@@ -23,7 +23,7 @@ func buildID3Tags(m *metadata.Metadata, track metadata.Track) map[string][]strin
 	tags[taglib.Label] = []string{metadata.JoinTags(m.Publisher)}
 	tags["PUBLISHER"] = []string{metadata.JoinTags(m.Publisher)}
 
-	if m.Year > 0 {
+	if m.Year > 0 && m.Year <= metadata.MaxYear {
 		tags[taglib.Date] = []string{strconv.Itoa(m.Year)}
 		tags["YEAR"] = []string{strconv.Itoa(m.Year)}
 	}

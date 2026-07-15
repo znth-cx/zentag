@@ -49,6 +49,8 @@ func TestValidateYear(t *testing.T) {
 	assert.Error(t, validateYear("0"))
 	assert.Error(t, validateYear("-5"))
 	assert.Error(t, validateYear("nineteen"))
+	assert.Error(t, validateYear("10000"))       // above metadata.MaxYear
+	assert.Error(t, validateYear("99999999999")) // would wrap int32
 }
 
 func TestValidateISBN(t *testing.T) {
