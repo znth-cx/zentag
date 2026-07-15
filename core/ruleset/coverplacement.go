@@ -10,6 +10,14 @@ import (
 
 const maxCoverSize = 3 * 1024 * 1024
 
+// itemDir returns path if it is a directory, else its parent (single-file M4B).
+func itemDir(path string) string {
+	if info, err := os.Stat(path); err == nil && !info.IsDir() {
+		return filepath.Dir(path)
+	}
+	return path
+}
+
 func CheckCoverPlacement(ctx context.Context, meta *metadata.Metadata) []Violation {
 	if meta == nil || len(meta.Tracks) == 0 {
 		return nil
@@ -40,7 +48,7 @@ func CheckCoverPlacement(ctx context.Context, meta *metadata.Metadata) []Violati
 			})
 		}
 
-		looseCover := filepath.Join(meta.OriginalPath, "cover.jpg")
+		looseCover := filepath.Join(itemDir(meta.OriginalPath), "cover.jpg")
 		if _, err := os.Stat(looseCover); err == nil {
 			violations = append(violations, Violation{
 				Rule:     "cover_placement",

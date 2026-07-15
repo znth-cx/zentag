@@ -30,6 +30,8 @@ func Write(ctx context.Context, w *ffmpeg.Wrapper, meta *metadata.Metadata, outp
 	var written []string
 	for i, track := range meta.Tracks {
 		outPath := filepath.Join(outputDir, trackNames[i]+filepath.Ext(track.Path))
+		// Record before writing so a partial file is cleaned up on failure.
+		written = append(written, outPath)
 
 		if err := w.WriteTrack(ctx, ffmpeg.WriteOpts{
 			InputPath:     track.Path,
@@ -47,8 +49,6 @@ func Write(ctx context.Context, w *ffmpeg.Wrapper, meta *metadata.Metadata, outp
 			writers.RemoveOutputs(ctx, "MP3Engine.Write", written)
 			return err
 		}
-
-		written = append(written, outPath)
 	}
 	return nil
 }

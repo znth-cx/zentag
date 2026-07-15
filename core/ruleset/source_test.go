@@ -29,8 +29,13 @@ func TestCheckSource(t *testing.T) {
 			wantViolLen: 0,
 		},
 		{
-			name:        "Invalid CASSETTE source",
+			name:        "Valid CASSETTE source",
 			source:      metadata.ReleaseSourceCassette,
+			wantViolLen: 0,
+		},
+		{
+			name:        "Invalid source",
+			source:      metadata.ReleaseSource("8-TRACK"),
 			wantViolLen: 1,
 			wantMsg:     "invalid source",
 		},

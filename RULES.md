@@ -49,6 +49,7 @@ These rules define the standards for audiobook uploads, covering naming conventi
 - WEB
 - CD
 - VINYL
+- CASSETTE
 
 **Container:**
 - M4B
@@ -152,7 +153,7 @@ For these tags to be valid they must show up in MediaInfo. If they do not, the u
 Every unique edition has its own separate set of slots. A unique edition is when an audiobook has (non-exhaustive list):
 - different narrators
 - different language
-- a unique source (WEB, CD, Vinyl)
+- a unique source (WEB, CD, Vinyl, Cassette)
 - abridged vs unabridged
 
 Note that purchasing an audiobook from different digital retailers does not grant its own slots. Example: purchasing from Audible and the publisher directly are both WEB formats and if they do not have other differences they cannot co-exist. However if one was from Audible and the other was from a CD sold by the publisher they are unique editions.

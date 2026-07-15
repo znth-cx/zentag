@@ -24,9 +24,10 @@ func CheckSource(meta *metadata.Metadata) []Violation {
 	}
 
 	allowedSources := map[metadata.ReleaseSource]bool{
-		metadata.ReleaseSourceWEB:   true,
-		metadata.ReleaseSourceCD:    true,
-		metadata.ReleaseSourceVinyl: true,
+		metadata.ReleaseSourceWEB:      true,
+		metadata.ReleaseSourceCD:       true,
+		metadata.ReleaseSourceVinyl:    true,
+		metadata.ReleaseSourceCassette: true,
 	}
 
 	if !allowedSources[meta.Source] {
@@ -34,7 +35,7 @@ func CheckSource(meta *metadata.Metadata) []Violation {
 			{
 				Rule:     "source",
 				Severity: SeverityTrumpable,
-				Message:  fmt.Sprintf("invalid source %q: must be one of %s", meta.Source, strings.Join([]string{string(metadata.ReleaseSourceWEB), string(metadata.ReleaseSourceCD), string(metadata.ReleaseSourceVinyl)}, ", ")),
+				Message:  fmt.Sprintf("invalid source %q: must be one of %s", meta.Source, strings.Join([]string{string(metadata.ReleaseSourceWEB), string(metadata.ReleaseSourceCD), string(metadata.ReleaseSourceVinyl), string(metadata.ReleaseSourceCassette)}, ", ")),
 			},
 		}
 	}
