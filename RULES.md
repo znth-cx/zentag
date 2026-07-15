@@ -59,6 +59,9 @@ These rules define the standards for audiobook uploads, covering naming conventi
 - AAC
 - MP3
 - FLAC
+- DD (Dolby Digital, AC-3)
+- DDP (Dolby Digital Plus, E-AC-3; includes Atmos/JOC)
+- TrueHD
 
 **Bitrate:**
 - Formatted as "xxxkbps"
