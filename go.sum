@@ -121,8 +121,8 @@ github.com/tetratelabs/wazero v1.12.0 h1:DuWcpNu/FzgEXgGBDp8J1Spc+CWOvvtvVyjKlaZ
 github.com/tetratelabs/wazero v1.12.0/go.mod h1:LvKtzl2RqO4gyF27BiXU+nKAjcV8f38U+kP/q2vgxh0=
 github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e h1:JVG44RsyaB9T2KIHavMF/ppJZNG9ZpyihvCd0w101no=
 github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e/go.mod h1:RbqR21r5mrJuqunuUZ/Dhy/avygyECGrLceyNeo4LiM=
-go.senan.xyz/taglib v0.13.0 h1:Xmf2mAOu3gTxvlHsrndQizS6mpJP9Dp3Q0WTSH5fX9Y=
-go.senan.xyz/taglib v0.13.0/go.mod h1:+k5CamBu88xgydgNGJjugYVeafoCCswoGjpw5w5CvD4=
+go.senan.xyz/taglib v0.14.0 h1:cFgq+w7Z++4VzccYBmBt+RwkOvx5ddexy1M7kIty8+Y=
+go.senan.xyz/taglib v0.14.0/go.mod h1:+k5CamBu88xgydgNGJjugYVeafoCCswoGjpw5w5CvD4=
 go.yaml.in/yaml/v3 v3.0.4 h1:tfq32ie2Jv2UxXFdLJdh3jXuOzWiL1fo0bu/FbuKpbc=
 go.yaml.in/yaml/v3 v3.0.4/go.mod h1:DhzuOOF2ATzADvBadXxruRBLzYTpT36CKvDb3+aBEFg=
 golang.org/x/exp v0.0.0-20231006140011-7918f672742d h1:jtJma62tbqLibJ5sFQz8bKtEM8rJBtfilJ2qTU199MI=

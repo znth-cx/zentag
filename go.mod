@@ -14,7 +14,7 @@ require (
 	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1
-	go.senan.xyz/taglib v0.13.0
+	go.senan.xyz/taglib v0.14.0
 	golang.org/x/image v0.44.0
 	golang.org/x/term v0.45.0
 	golang.org/x/text v0.40.0
