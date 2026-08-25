@@ -57,6 +57,7 @@ These rules define the standards for audiobook uploads, covering naming conventi
 
 **Codec:**
 - AAC
+- xHE-AAC (USAC, mp4a-40-42)
 - MP3
 - FLAC
 - DD (Dolby Digital, AC-3)

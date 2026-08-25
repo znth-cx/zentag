@@ -1,6 +1,6 @@
 module github.com/znth-cx/zentag
 
-go 1.26.5
+go 1.26.6
 
 require (
 	github.com/Sorrow446/go-mp4tag v0.0.0-20240130220823-68ce31d53e37
@@ -15,9 +15,9 @@ require (
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.11.1
 	go.senan.xyz/taglib v0.13.0
-	golang.org/x/image v0.44.0
+	golang.org/x/image v0.45.0
 	golang.org/x/term v0.45.0
-	golang.org/x/text v0.40.0
+	golang.org/x/text v0.41.0
 )
 
 require (
