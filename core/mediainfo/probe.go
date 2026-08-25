@@ -19,16 +19,58 @@ type TechnicalInfo struct {
 
 // mediainfoTrack represents one track from mediainfo JSON output.
 type mediainfoTrack struct {
-	Type     string `json:"@type"`
-	Format   string `json:"Format"`
-	Profile  string `json:"Format_Profile"`
-	BitRate  string `json:"BitRate"`
-	Title    string `json:"Title"`
-	Genre    string `json:"Genre"`
-	Language string `json:"Language"`
+	Type           string `json:"@type"`
+	Format         string `json:"Format"`
+	Profile        string `json:"Format_Profile"`
+	BitRate        string `json:"BitRate"`
+	BitRateNominal string `json:"BitRate_Nominal"`
+	StreamSize     string `json:"StreamSize"`
+	Duration       string `json:"Duration"`
+	Title          string `json:"Title"`
+	Genre          string `json:"Genre"`
+	Language       string `json:"Language"`
 	// Comment is a named General field (©cmt atom), not in Extra. Fallback needed for description round-trip.
-	Comment string            `json:"Comment"`
-	Extra   map[string]string `json:"extra"`
+	Comment string   `json:"Comment"`
+	Extra   extraMap `json:"extra"`
+}
+
+// extraMap decodes mediainfo's "extra" object, coercing array values (a
+// repeated atom emits an array) to strings so lookups stay simple.
+type extraMap map[string]string
+
+func (m *extraMap) UnmarshalJSON(b []byte) error {
+	raw := map[string]json.RawMessage{}
+	if err := json.Unmarshal(b, &raw); err != nil {
+		return err
+	}
+	out := make(map[string]string, len(raw))
+	for k, v := range raw {
+		out[k] = coerceExtraValue(v)
+	}
+	*m = out
+	return nil
+}
+
+// coerceExtraValue renders an extra value as a string; arrays are deduped
+// and joined with ";", non-strings fall back to raw JSON unquoted.
+func coerceExtraValue(v json.RawMessage) string {
+	var s string
+	if json.Unmarshal(v, &s) == nil {
+		return s
+	}
+	var arr []string
+	if json.Unmarshal(v, &arr) == nil {
+		seen := make(map[string]bool, len(arr))
+		var uniq []string
+		for _, a := range arr {
+			if !seen[a] {
+				seen[a] = true
+				uniq = append(uniq, a)
+			}
+		}
+		return strings.Join(uniq, ";")
+	}
+	return strings.Trim(string(v), `"`)
 }
 
 type mediainfoOutput struct {
@@ -94,15 +136,13 @@ func (w *Wrapper) Probe(ctx context.Context, path string) (TechnicalInfo, error)
 		return TechnicalInfo{}, fmt.Errorf("mediainfo probe: %w", err)
 	}
 
-	// Defensive parse: some mediainfo variants emit "128000.0" or stray whitespace.
-	raw := strings.TrimSpace(audio.BitRate)
-	bitrateBps, err := strconv.Atoi(raw)
-	if err != nil {
-		f, ferr := strconv.ParseFloat(raw, 64)
-		if ferr != nil {
-			return TechnicalInfo{}, fmt.Errorf("mediainfo probe %q: parse Audio BitRate %q: %w", path, audio.BitRate, err)
-		}
-		bitrateBps = int(f)
+	// BitRate absent on VBR encodes; fall back to nominal, then stream size/duration, else 0.
+	bitrateBps := parseBitrateBps(audio.BitRate, audio.BitRateNominal)
+	if bitrateBps == 0 {
+		bitrateBps = bitrateFromStreamSize(audio.StreamSize, audio.Duration)
+	}
+	if bitrateBps == 0 {
+		slog.WarnContext(ctx, "mediainfo probe: no bitrate reported, defaulting to 0", "path", path)
 	}
 
 	info := TechnicalInfo{
@@ -113,4 +153,34 @@ func (w *Wrapper) Probe(ctx context.Context, path string) (TechnicalInfo, error)
 	}
 	slog.DebugContext(ctx, "mediainfo probe succeeded", "path", path, "info", info)
 	return info, nil
+}
+
+// parseBitrateBps returns the first parseable bps value (int or float), or 0.
+func parseBitrateBps(vals ...string) int {
+	for _, v := range vals {
+		v = strings.TrimSpace(v)
+		if v == "" {
+			continue
+		}
+		if n, err := strconv.Atoi(v); err == nil {
+			return n
+		}
+		if f, err := strconv.ParseFloat(v, 64); err == nil {
+			return int(f)
+		}
+	}
+	return 0
+}
+
+// bitrateFromStreamSize derives bps from byte count and duration; 0 if either is unusable.
+func bitrateFromStreamSize(streamSize, duration string) int {
+	bytes, err := strconv.ParseFloat(strings.TrimSpace(streamSize), 64)
+	if err != nil || bytes <= 0 {
+		return 0
+	}
+	secs, err := strconv.ParseFloat(strings.TrimSpace(duration), 64)
+	if err != nil || secs <= 0 {
+		return 0
+	}
+	return int(bytes * 8 / secs)
 }
