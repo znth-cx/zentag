@@ -100,12 +100,13 @@ func TestProbe_BitRateVariants(t *testing.T) {
 		name    string
 		bitrate string
 		want    int
-		wantErr bool
 	}{
 		{name: "plain digits", bitrate: "128000", want: 128},
 		{name: "whitespace", bitrate: " 128000 ", want: 128},
 		{name: "float", bitrate: "128000.0", want: 128},
-		{name: "garbage", bitrate: "garbage", wantErr: true},
+		// Missing/garbage bitrate is non-fatal: 0, not an error.
+		{name: "garbage", bitrate: "garbage", want: 0},
+		{name: "empty", bitrate: "", want: 0},
 	}
 
 	for _, tc := range cases {
@@ -118,12 +119,38 @@ func TestProbe_BitRateVariants(t *testing.T) {
 			w := &Wrapper{BinPath: "mediainfo", Runner: fr}
 
 			got, err := w.Probe(context.Background(), "book.m4b")
-			if tc.wantErr {
-				if err == nil {
-					t.Fatal("Probe() error = nil, want error")
-				}
-				return
+			if err != nil {
+				t.Fatalf("Probe() error = %v", err)
 			}
+			if got.Bitrate != tc.want {
+				t.Errorf("Bitrate = %d, want %d", got.Bitrate, tc.want)
+			}
+		})
+	}
+}
+
+func TestProbe_BitRateFallbacks(t *testing.T) {
+	cases := []struct {
+		name  string
+		audio string
+		want  int
+	}{
+		{
+			name:  "nominal when BitRate empty",
+			audio: `{"@type":"Audio","Format":"AAC","BitRate":"","BitRate_Nominal":"64000"}`,
+			want:  64,
+		},
+		{
+			name:  "derived from stream size and duration",
+			audio: `{"@type":"Audio","Format":"AAC","StreamSize":"16000000","Duration":"2000"}`, // 16MB*8/2000s = 64000 bps
+			want:  64,
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			out := `{"media":{"track":[{"@type":"General","Format":"MPEG-4"},` + tc.audio + `]}}`
+			w := &Wrapper{BinPath: "mediainfo", Runner: &fakeRunner{out: []byte(out)}}
+			got, err := w.Probe(context.Background(), "book.m4b")
 			if err != nil {
 				t.Fatalf("Probe() error = %v", err)
 			}
@@ -159,13 +186,6 @@ func TestProbe_ErrorCases(t *testing.T) {
 			name: "missing general track",
 			out: `{"media":{"track":[
 				{"@type":"Audio","Format":"AAC","BitRate":"128000"}
-			]}}`,
-		},
-		{
-			name: "non-numeric bitrate",
-			out: `{"media":{"track":[
-				{"@type":"General","Format":"MPEG-4"},
-				{"@type":"Audio","Format":"AAC","BitRate":"not-a-number"}
 			]}}`,
 		},
 	}

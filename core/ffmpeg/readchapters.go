@@ -38,7 +38,11 @@ func (w *Wrapper) ReadChapters(ctx context.Context, path string) ([]metadata.Cha
 		return nil, fmt.Errorf("ffprobe read chapters %q: parse JSON: %w", path, err)
 	}
 
+	// Dedup by start: two chapter representations (chpl + text track) can list
+	// each boundary twice; legit chapters never share a start.
 	chapters := make([]metadata.Chapter, 0, len(parsed.Chapters))
+	seenStart := make(map[time.Duration]bool, len(parsed.Chapters))
+	dropped := 0
 	for _, c := range parsed.Chapters {
 		start, err := parseSeconds(c.StartTime)
 		if err != nil {
@@ -48,11 +52,19 @@ func (w *Wrapper) ReadChapters(ctx context.Context, path string) ([]metadata.Cha
 		if err != nil {
 			return nil, fmt.Errorf("ffprobe read chapters %q: parse end_time %q: %w", path, c.EndTime, err)
 		}
+		if seenStart[start] {
+			dropped++
+			continue
+		}
+		seenStart[start] = true
 		chapters = append(chapters, metadata.Chapter{
 			Title: c.Tags.Title,
 			Start: start,
 			End:   end,
 		})
+	}
+	if dropped > 0 {
+		slog.WarnContext(ctx, "ffprobe read chapters: dropped duplicate chapters at repeated start times", "path", path, "dropped", dropped)
 	}
 
 	slog.DebugContext(ctx, "ffprobe read chapters succeeded", "path", path, "count", len(chapters))

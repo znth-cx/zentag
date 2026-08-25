@@ -64,6 +64,20 @@ func TestNormalizeAudioFormat(t *testing.T) {
 			wantContainer: "M4B",
 			wantCodec:     "TrueHD",
 		},
+		{
+			name:          "m4b usac (xhe-aac)",
+			path:          "book.m4b",
+			info:          TechnicalInfo{Codec: "USAC"},
+			wantContainer: "M4B",
+			wantCodec:     "xHE-AAC",
+		},
+		{
+			name:          "m4b xhe-aac spelled out",
+			path:          "book.m4b",
+			info:          TechnicalInfo{Codec: "xHE-AAC"},
+			wantContainer: "M4B",
+			wantCodec:     "xHE-AAC",
+		},
 	}
 
 	for _, tc := range cases {

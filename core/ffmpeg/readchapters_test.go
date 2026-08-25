@@ -54,6 +54,39 @@ func TestReadChapters_HappyPath(t *testing.T) {
 	}
 }
 
+// dupMenuJSON: full chapter list repeated (two representations), each start twice.
+const dupMenuJSON = `{
+  "chapters": [
+    {"start_time": "0.000000", "end_time": "60.000000", "tags": {"title": "Chapter One"}},
+    {"start_time": "60.000000", "end_time": "125.500000", "tags": {"title": "Chapter Two"}},
+    {"start_time": "0.000000", "end_time": "60.000000", "tags": {"title": "Chapter One"}},
+    {"start_time": "60.000000", "end_time": "125.500000", "tags": {"title": "Chapter Two"}}
+  ]
+}`
+
+func TestReadChapters_DedupsRepeatedStarts(t *testing.T) {
+	fr := &fakeRunner{returnOut: []byte(dupMenuJSON)}
+	w := &Wrapper{BinPath: "ffmpeg", ProbeBinPath: "ffprobe", Runner: fr}
+
+	got, err := w.ReadChapters(context.Background(), "book.m4b")
+	if err != nil {
+		t.Fatalf("ReadChapters() error = %v", err)
+	}
+
+	want := []metadata.Chapter{
+		{Title: "Chapter One", Start: 0, End: 60 * time.Second},
+		{Title: "Chapter Two", Start: 60 * time.Second, End: 125500 * time.Millisecond},
+	}
+	if len(got) != len(want) {
+		t.Fatalf("ReadChapters() = %+v, want %+v (duplicates should be dropped)", got, want)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Errorf("chapter[%d] = %+v, want %+v", i, got[i], want[i])
+		}
+	}
+}
+
 func TestReadChapters_NoChaptersReturnsEmptyNotError(t *testing.T) {
 	fr := &fakeRunner{returnOut: []byte(noChaptersJSON)}
 	w := &Wrapper{BinPath: "ffmpeg", ProbeBinPath: "ffprobe", Runner: fr}
