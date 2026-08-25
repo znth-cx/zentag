@@ -11,7 +11,7 @@ import (
 var ErrUnsupportedAudioFormat = errors.New("mediainfo: unsupported audio format")
 
 // NormalizeAudioFormat maps extension + codec to RULES.md container/codec tokens.
-// M4B codecs: AAC, xHE-AAC (USAC), or Dolby DD/DDP/TrueHD (E-AC-3 JOC folds into DDP).
+// M4B codecs: AAC, USAC (xHE-AAC), or Dolby DD/DDP/TrueHD (E-AC-3 JOC folds into DDP).
 func NormalizeAudioFormat(path string, info TechnicalInfo) (container, codec string, err error) {
 	format := strings.ToLower(info.Codec)
 	profile := strings.ToLower(info.Profile)
@@ -20,7 +20,7 @@ func NormalizeAudioFormat(path string, info TechnicalInfo) (container, codec str
 	switch {
 	// Check before AAC: "xHE-AAC" contains "aac".
 	case isM4B && (strings.Contains(format, "usac") || strings.Contains(format, "xhe-aac")):
-		return "M4B", "xHE-AAC", nil
+		return "M4B", "USAC", nil
 	case isM4B && strings.Contains(format, "aac"):
 		return "M4B", "AAC", nil
 	// E-AC-3 before AC-3: "e-ac-3" contains "ac-3".
