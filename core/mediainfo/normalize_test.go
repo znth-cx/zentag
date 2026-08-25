@@ -65,18 +65,18 @@ func TestNormalizeAudioFormat(t *testing.T) {
 			wantCodec:     "TrueHD",
 		},
 		{
-			name:          "m4b usac (xhe-aac)",
+			name:          "m4b usac",
 			path:          "book.m4b",
 			info:          TechnicalInfo{Codec: "USAC"},
 			wantContainer: "M4B",
-			wantCodec:     "xHE-AAC",
+			wantCodec:     "USAC",
 		},
 		{
-			name:          "m4b xhe-aac spelled out",
+			name:          "m4b xhe-aac reported as usac token",
 			path:          "book.m4b",
 			info:          TechnicalInfo{Codec: "xHE-AAC"},
 			wantContainer: "M4B",
-			wantCodec:     "xHE-AAC",
+			wantCodec:     "USAC",
 		},
 	}
 
